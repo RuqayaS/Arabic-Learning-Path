@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arabic Learning Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Karla:wght@400;500;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap">
+<style>
+/* Layout: a four-stop timeline selects one topic panel; long content folds into dropdowns; English or Urdu sets the page direction. */
+:root {
+  --bg: #eef2f4;
+  --surface: #fbfcfd;
+  --ink: #17252e;
+  --soft: #51636f;
+  --line: #cbd6dc;
+  --accent: #174f8a;
+  --on-accent: #ffffff;
+  --accent-bg: #dce9f5;
+  --arabic: "Amiri", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic", serif;
+  --latin: "Karla", "Segoe UI", system-ui, sans-serif;
+  --urdu: "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "Urdu Typesetting", "Noto Naskh Arabic", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11191f; --surface: #18232b; --ink: #e9eff2; --soft: #a3b3bd;
+    --line: #31424e; --accent: #8cc0f2; --on-accent: #10202c; --accent-bg: #1c3550; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11191f; --surface: #18232b; --ink: #e9eff2; --soft: #a3b3bd;
+  --line: #31424e; --accent: #8cc0f2; --on-accent: #10202c; --accent-bg: #1c3550; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--latin);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.page {
+  max-width: 68rem;
+  margin: 0 auto;
+  padding-block: 1.5rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 1.25rem;
+}
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; }
+h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.lang button { font: inherit; font-size: 0.9rem; color: var(--ink); background: none; border: 0; padding: 0.3rem 0.8rem; cursor: pointer; }
+.lang button[lang="ur"] { font-family: var(--urdu); line-height: 2; font-size: 0.85rem; padding-block: 0; }
+.lang button[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); font-weight: 700; }
+.lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: relative; }
+.timeline::before { content: ""; position: absolute; top: 1.25rem; left: 12.5%; right: 12.5%; height: 2px; background: var(--line); }
+.timeline li { min-width: 0; position: relative; }
+.stop { width: 100%; height: 100%; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 6px; padding: 0.25rem 0.25rem 0.5rem; cursor: pointer; display: grid; justify-items: center; align-content: start; gap: 0.3rem; text-align: center; }
+.stop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dot { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; font-family: var(--latin); line-height: 1; font-size: 0.9rem; font-weight: 700; background: var(--bg); border: 2px dashed var(--line); color: var(--soft); }
+.stop.ready .dot { border: 2px solid var(--accent); color: var(--accent); }
+.stop[aria-current="true"] .dot { background: var(--accent); border: 2px solid var(--accent); color: var(--on-accent); }
+.stop:hover .dot { border-color: var(--accent); }
+.stop-name { font-size: 0.9rem; font-weight: 500; line-height: 1.25; }
+.stop[aria-current="true"] .stop-name { font-weight: 700; color: var(--accent); }
+.stop-state { font-size: 0.75rem; color: var(--soft); line-height: 1.2; }
+
+.panel { display: grid; gap: 1rem; padding-top: 1.25rem; border-top: 1px solid var(--line); min-width: 0; }
+.panel h2 { margin: 0; font-size: 1.3rem; line-height: 1.25; font-weight: 700; text-wrap: balance; }
+.sub { margin: 0.2rem 0 0; max-width: 65ch; color: var(--soft); }
+.soon { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 2rem 1rem; text-align: center; font-weight: 500; color: var(--soft); }
+
+.picker { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.picker button { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem; }
+.picker button:hover { border-color: var(--accent); }
+.picker button[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.picker button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.word { font-family: var(--arabic); font-size: 1.3rem; line-height: 1.4; font-weight: 400; }
+
+.group-head { margin: 0.25rem 0 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; text-wrap: balance; }
+.table-wide { display: none; }
+.table-narrow { display: grid; gap: 0.5rem; }
+.person { margin: 0; font-size: 1.02rem; font-weight: 700; }
+.person small { display: block; font-size: 0.85rem; font-weight: 400; color: var(--soft); }
+.row-label { font-weight: 500; font-size: 0.92rem; }
+.cell { background: var(--surface); min-width: 0; padding: 0.6rem 0.85rem; display: grid; gap: 0.1rem; align-content: center; }
+.cell-label { font-size: 0.8rem; color: var(--soft); }
+.arabic { font-family: var(--arabic); font-size: 1.7rem; line-height: 1.7; direction: rtl; text-align: right; }
+.end { color: var(--accent); }
+.meaning { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25rem 0.6rem; font-size: 0.9rem; color: var(--soft); }
+.meaning b { color: var(--ink); font-weight: 500; }
+.chip { font-family: var(--arabic); font-size: 1.05rem; line-height: 1.5; direction: rtl; color: var(--accent); background: var(--accent-bg); border-radius: 4px; padding: 0 0.45rem; white-space: nowrap; }
+.note { margin: 0; max-width: 65ch; font-size: 0.9rem; color: var(--soft); }
+.lat { font-family: var(--latin); }
+.inline-ar { font-family: var(--arabic); font-size: 1.15em; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+summary { list-style: none; cursor: pointer; padding-block: 0.7rem; padding-inline: 0.85rem 2.5rem; position: relative; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: ""; position: absolute; inset-inline-end: 1rem; top: 50%; width: 0.55rem; height: 0.55rem; margin-top: -0.4rem; border-right: 2px solid var(--soft); border-bottom: 2px solid var(--soft); transform: rotate(45deg); }
+details[open] > summary::after { transform: rotate(225deg); margin-top: -0.1rem; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+.sum-title { display: block; font-weight: 700; line-height: 1.3; }
+.sum-sub { display: block; font-size: 0.875rem; color: var(--soft); line-height: 1.35; }
+.fold { display: grid; gap: 0.75rem; padding: 0 0.85rem 0.85rem; min-width: 0; }
+.table-narrow .fold { gap: 0; padding: 0; }
+.table-narrow .cell { border-top: 1px solid var(--line); background: none; }
+.fold p { margin: 0; }
+.fold h4 { margin: 0; font-size: 1rem; font-weight: 700; }
+.topics { display: grid; gap: 1rem; }
+.topic { display: grid; gap: 0.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--line); min-width: 0; }
+.pairs { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.5rem; }
+.pair { display: grid; gap: 0.1rem; padding: 0.5rem 0.7rem; border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.pair .mini { display: block; text-align: right; }
+
+.stop-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+.stop-table { width: 100%; border-collapse: collapse; }
+.stop-table th, .stop-table td { padding: 0.45rem 0.65rem; text-align: start; vertical-align: middle; border-bottom: 1px solid var(--line); }
+.stop-table tr:last-child td { border-bottom: 0; }
+.stop-table th { font-size: 0.85rem; font-weight: 700; }
+.stop-table td:first-child { font-size: 0.9rem; font-weight: 500; }
+.mini { font-family: var(--arabic); font-size: 1.4rem; line-height: 1.6; direction: rtl; }
+.translit { display: block; font-size: 0.85rem; color: var(--soft); }
+.items { list-style: none; margin: 0; padding: 0; display: grid; }
+.items li { display: grid; gap: 0.35rem; padding-block: 0.8rem; border-top: 1px solid var(--line); min-width: 0; }
+.items h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.items p { color: var(--soft); max-width: 65ch; }
+.ex .mini { display: block; text-align: right; }
+.ex .translit { text-align: right; }
+
+/* Nastaliq needs far more vertical room than Latin text. */
+.page[lang="ur"] { font-family: var(--urdu); line-height: 2.2; font-size: 0.94rem; }
+.page[lang="ur"] h1,
+.page[lang="ur"] .panel h2,
+.page[lang="ur"] .group-head,
+.page[lang="ur"] .sum-title,
+.page[lang="ur"] .sum-sub,
+.page[lang="ur"] .stop-name,
+.page[lang="ur"] .stop-state { line-height: 2.2; }
+.page[lang="ur"] .sum-title, .page[lang="ur"] .sum-sub { line-height: 2.1; }
+.page[lang="ur"] .stop-name { font-size: 0.8rem; }
+.page[lang="ur"] .stop-state { font-size: 0.7rem; }
+.page[lang="ur"] h1 { font-size: 1.3rem; }
+.page[lang="ur"] .panel h2 { font-size: 1.1rem; }
+.page[lang="ur"] .group-head, .page[lang="ur"] .person, .page[lang="ur"] .sum-title { font-size: 0.95rem; }
+.page[lang="ur"] .note, .page[lang="ur"] .meaning, .page[lang="ur"] .translit, .page[lang="ur"] .sum-sub { font-size: 0.88rem; }
+.page[lang="ur"] .pair, .page[lang="ur"] .cell { gap: 0.5rem; }
+.nb { white-space: nowrap; }
+.page[lang="ur"] .person small, .page[lang="ur"] .cell-label { font-size: 0.82rem; display: block; line-height: 2.2; }
+.page[lang="ur"] .row-label { font-size: 0.85rem; }
+.page[lang="ur"] .lat { font-size: 1.1em; }
+.page[lang="ur"] .ex .translit, .page[lang="ur"] .pair .translit { text-align: start; }
+.page[lang="ur"] .ex .mini { text-align: start; }
+
+@media (min-width: 760px) {
+  h1 { font-size: 1.75rem; }
+  .stop-name { font-size: 1rem; }
+  .page[lang="ur"] .stop-name { font-size: 0.92rem; }
+  .table-narrow { display: none; }
+  .table-wide { display: grid; grid-template-columns: 7.5rem repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); border-inline-start: 1px solid var(--line); }
+  .table-wide > * { grid-column: var(--c); grid-row: var(--r) / span var(--s, 1); border-inline-end: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); }
+  .table-wide .person, .table-wide .row-label { padding: 0.6rem 0.85rem; }
+  .table-wide .row-label { display: flex; align-items: center; }
+  .items li { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); column-gap: 2rem; align-items: center; }
+  .items .ex { grid-column: 2; grid-row: 1 / span 2; }
+}
+</style>
+</head>
+<body>
+
+<main class="page" id="page" lang="en" dir="ltr">
+  <div class="top">
+    <h1 data-t="siteTitle">Arabic Learning Path</h1>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" id="lang-en" lang="en" dir="ltr" aria-pressed="true">English</button>
+      <button type="button" id="lang-ur" lang="ur" dir="rtl" aria-pressed="false">اردو</button>
+    </div>
+  </div>
+  <nav data-aria="topicsLabel"><ol class="timeline" id="timeline"></ol></nav>
+
+  <section class="panel" id="panel-soon" hidden>
+    <div>
+      <h2 id="soon-title"></h2>
+      <p class="sub" id="soon-sub"></p>
+    </div>
+    <div class="soon" data-t="comingSoon"></div>
+  </section>
+
+  <section class="panel" id="panel-past-tense" hidden>
+    <div>
+      <h2 data-t="pastTitle"></h2>
+      <p class="sub" data-t="pastSub"></p>
+    </div>
+    <div class="picker" id="picker" role="group"></div>
+    <div class="table-wide" id="table-wide"></div>
+    <div class="table-narrow" id="table-narrow"></div>
+    <p class="note" id="note" hidden></p>
+
+    <div>
+      <h3 class="group-head" data-t="contextHead"></h3>
+      <p class="sub" data-t="contextSub"></p>
+    </div>
+    <div class="picker" id="picker-context" role="group"></div>
+
+    <details id="fold-sukoon">
+      <summary><span class="sum-title" data-t="sukoonTitle"></span><span class="sum-sub" data-t="sukoonSub"></span></summary>
+      <div class="fold">
+        <div class="topics" id="why-block"></div>
+        <h4 data-t="allEndings"></h4>
+        <p class="note" data-t="stopRule"></p>
+        <div class="stop-wrap"><table class="stop-table"><thead><tr><th scope="col" data-t="colMeaning"></th><th scope="col" data-t="colFull"></th><th scope="col" data-t="colStop"></th></tr></thead><tbody id="stop-body"></tbody></table></div>
+        <p class="note" data-t="noChange"></p>
+      </div>
+    </details>
+
+    <details id="fold-dropped">
+      <summary><span class="sum-title" data-t="droppedTitle"></span><span class="sum-sub" data-t="droppedSub"></span></summary>
+      <div class="fold">
+        <ul class="items">
+          <li><h3 data-t="dPronounH"></h3><p data-t="dPronounP"></p><div class="ex" id="ex-pronoun"></div></li>
+          <li><h3 data-t="dNounH"></h3><p data-t="dNounP"></p><div class="ex" id="ex-noun"></div></li>
+          <li><h3 data-t="dTanweenH"></h3><p data-t="dTanweenP"></p><div class="ex" id="ex-tanween"></div></li>
+          <li><h3 data-t="dGroupH"></h3><p data-t="dGroupP"></p><div class="ex" id="ex-group"></div></li>
+        </ul>
+      </div>
+    </details>
+  </section>
+</main>
+
+<script>
+const lat = text => `<bdi class="lat" dir="ltr">${text}</bdi>`;
+const ar = text => `<bdi class="inline-ar" lang="ar" dir="rtl">${text}</bdi>`;
+
+const T = {
+  en: {
+    siteTitle: 'Arabic Learning Path',
+    topicsLabel: 'Topics',
+    comingSoon: 'Coming soon',
+    ready: 'Ready',
+    pastTitle: 'Past tense table',
+    pastSub: 'Pick a verb. The colored ending shows who did the action.',
+    pickVerb: 'Choose a verb',
+    contextHead: "How things can change based on context and dialect (all teacher's remarks and points made in class)",
+    contextSub: 'Pick a verb to update the examples below.',
+    sukoonTitle: 'When a vowel becomes sukoon',
+    sukoonSub: 'How endings sound when you stop after a word',
+    allEndings: 'All the endings at a stop',
+    stopRule: 'When you stop after a word, you usually drop its short last vowel. In the middle of a sentence, the vowel stays.',
+    colMeaning: 'Meaning',
+    colFull: 'Full form',
+    colStop: 'At a stop',
+    noChange: `These stay the same because they already end in sukoon or a long vowel: ${lat('-tum, -at, -naa, -uu')}.`,
+    droppedTitle: 'Other things that get dropped',
+    droppedSub: 'Pronouns, noun vowels, nunation, and group endings',
+    dPronounH: 'The pronoun',
+    dPronounP: `The ending already shows who did the action, so ${ar('أَنَا')} and ${ar('هُوَ')} are usually left out. Keep them for emphasis.`,
+    dNounH: "A noun's last vowel",
+    dNounP: 'The stop rule also applies to nouns and pronouns. In the example above, the verb keeps its damma in the middle of the sentence. The last word loses its final vowel at the stop.',
+    dTanweenH: 'Nunation and the sound of ة',
+    dTanweenP: `At a stop, ${lat('-un')} and ${lat('-in')} disappear, ${lat('-an')} becomes a long ${lat('-aa')}, and ة sounds like a soft h.`,
+    dGroupH: 'The group ending',
+    dGroupP: `When the verb comes before a named group, it stays singular. It still shows gender, so a female group keeps ${lat('-at')}.`,
+    whyH: 'Why I and you (male) can sound the same',
+    whyP: 'When you stop on a word in Arabic, you usually don\'t say its short last vowel. The damma in the I form and the fatha in the you form both drop, so ت gets a sukoon in both. The you (female) form usually does the same.',
+    whyNote: 'The sentence usually shows who is meant. If it doesn\'t, speakers often keep the vowel.',
+    alifH: 'The alif in first person',
+    alifP: `The alif in ${ar('أَنَا')} is always written. In formal Arabic, it usually sounds short in the middle of a sentence and long when you stop on the word. The alif in ${ar('نَا')} stays long in formal Arabic, even at a stop, but many dialects shorten it.`,
+    anaLabel: `${ar('أَنَا')}, in the middle of a sentence`,
+    naLabel: `${ar('نَا')}, formal and dialect`,
+    becomes: (a, b) => `${lat(a)} becomes ${lat(b)}`,
+    naText: (a, b) => `${lat(a)}, often ${lat(b)} in dialect`,
+    rows: ['Male', 'Female', 'Group: male or mixed', 'Group: female'],
+    group: 'Group',
+    persons: [['First person', 'I, we'], ['Second person', 'you'], ['Third person', 'he, she, they']],
+    topics: {
+      demonstratives: ['This, that, these, those', 'Words for pointing at people and things.'],
+      pronouns: ['Pronouns', 'He, she, it, they, we, our, her, him, theirs, and the rest.'],
+      gender: ['Male and female words', 'How to tell male and female words apart.'],
+      'past-tense': ['Past tense table', '']
+    },
+    gMale: ' (male)',
+    gFemale: ' (female)'
+  },
+  ur: {
+    siteTitle: 'عربی سیکھنے کا راستہ',
+    topicsLabel: 'موضوعات',
+    comingSoon: 'جلد آ رہا ہے',
+    ready: 'تیار',
+    pastTitle: 'ماضی کا جدول',
+    pastSub: 'کوئی فعل چنیں۔ رنگین آخری حصہ بتاتا ہے کہ کام کس نے کیا۔',
+    pickVerb: 'فعل چنیں',
+    contextHead: 'سیاق و سباق اور لہجے کے مطابق تبدیلیاں (استاد کی تمام باتیں اور کلاس کے نکات)',
+    contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
+    sukoonTitle: 'جب حرکت سکون میں بدل جائے',
+    sukoonSub: 'لفظ پر رکنے سے آخری آواز کیسے بدلتی ہے',
+    allEndings: 'رکنے پر تمام آخری حصے',
+    stopRule: 'لفظ پر رکتے وقت اس کی چھوٹی آخری حرکت عام طور پر نہیں بولی جاتی۔ جملے کے بیچ میں حرکت باقی رہتی ہے۔',
+    colMeaning: 'مطلب',
+    colFull: 'پوری شکل',
+    colStop: 'رکنے پر',
+    noChange: `یہ نہیں بدلتے، کیونکہ ان کے آخر میں پہلے سے سکون یا لمبی آواز ہے: <span class="nb">${lat('-tum, -at, -naa, -uu')}</span>۔`,
+    droppedTitle: 'اور کیا چیزیں چھوڑی جاتی ہیں',
+    droppedSub: 'ضمیر، اسم کی حرکت، تنوین اور جمع کا آخری حصہ',
+    dPronounH: 'ضمیر',
+    dPronounP: `آخری حصے سے پتا چل جاتا ہے کہ کام کس نے کیا، اس لیے ${ar('أَنَا')} اور ${ar('هُوَ')} عام طور پر چھوڑ دیے جاتے ہیں۔ زور دینے کے لیے انہیں رکھا جاتا ہے۔`,
+    dNounH: 'اسم کی آخری حرکت',
+    dNounP: 'رکنے کا یہی اصول اسموں اور ضمیروں پر بھی لگتا ہے۔ اوپر کی مثال میں جملے کے بیچ فعل اپنا پیش رکھتا ہے۔ آخری لفظ رکنے پر اپنی آخری حرکت کھو دیتا ہے۔',
+    dTanweenH: 'تنوین اور ة کی آواز',
+    dTanweenP: `رکنے پر ${lat('-un')} اور ${lat('-in')} ہٹ جاتے ہیں، ${lat('-an')} لمبا ${lat('-aa')} بن جاتا ہے، اور ة ہلکی ہ کی طرح بولی جاتی ہے۔`,
+    dGroupH: 'جمع کا آخری حصہ',
+    dGroupP: `جب فعل کسی نام والے گروہ سے پہلے آئے تو واحد رہتا ہے۔ جنس پھر بھی ظاہر ہوتی ہے، اس لیے مؤنث گروہ میں ${lat('-at')} رہتا ہے۔`,
+    whyH: 'میں اور تم (مذکر) ایک جیسے کیوں سنائی دے سکتے ہیں',
+    whyP: 'عربی میں لفظ پر رکتے وقت چھوٹی آخری حرکت عام طور پر نہیں بولی جاتی۔ «میں» والی شکل کا پیش اور «تم» والی شکل کا زبر دونوں ہٹ جاتے ہیں، اس لیے دونوں میں ت پر سکون آ جاتا ہے۔ «تم» (مؤنث) میں بھی عام طور پر یہی ہوتا ہے۔',
+    whyNote: 'جملے سے عام طور پر پتا چل جاتا ہے کہ بات کس کی ہو رہی ہے۔ اگر نہ چلے تو بولنے والے اکثر حرکت باقی رکھتے ہیں۔',
+    alifH: 'پہلے شخص میں الف',
+    alifP: `${ar('أَنَا')} کا الف ہمیشہ لکھا جاتا ہے۔ فصیح عربی میں یہ جملے کے بیچ عام طور پر چھوٹا اور لفظ پر رکنے پر لمبا سنائی دیتا ہے۔ ${ar('نَا')} کا الف فصیح عربی میں رکنے پر بھی لمبا رہتا ہے، لیکن کئی لہجوں میں چھوٹا ہو جاتا ہے۔`,
+    anaLabel: `${ar('أَنَا')}، جملے کے بیچ میں`,
+    naLabel: `${ar('نَا')}، فصیح اور لہجہ`,
+    becomes: (a, b) => `${lat(a)} سے ${lat(b)} بن جاتا ہے`,
+    naText: (a, b) => `${lat(a)}، لہجے میں اکثر ${lat(b)}`,
+    rows: ['مذکر', 'مؤنث', 'جمع: مذکر یا ملا جلا', 'جمع: مؤنث'],
+    group: 'جمع',
+    persons: [['پہلا شخص', 'میں، ہم'], ['دوسرا شخص', 'تم'], ['تیسرا شخص', 'وہ']],
+    topics: {
+      demonstratives: ['یہ، وہ، یہ سب، وہ سب', 'لوگوں اور چیزوں کی طرف اشارہ کرنے والے الفاظ۔'],
+      pronouns: ['ضمیریں', 'وہ، یہ، ہم، ہمارا، اس کا، انہیں، ان کا اور باقی ضمیریں۔'],
+      gender: ['مذکر اور مؤنث الفاظ', 'مذکر اور مؤنث الفاظ کو پہچاننے کا طریقہ۔'],
+      'past-tense': ['ماضی کا جدول', '']
+    },
+    gMale: ' (مذکر)',
+    gFemale: ' (مؤنث)'
+  }
+};
+
+const topics = [
+  { id: 'demonstratives' },
+  { id: 'pronouns' },
+  { id: 'gender' },
+  { id: 'past-tense', ready: true }
+];
+
+const verbs = [
+  { ar: 'أَخَذ', en: 'took', ur: 'لیا', t: 'akhadh',
+    note: { en: 'Written here as akhadh, the standard pronunciation. In everyday speech you may also hear akhaz or akaz.', ur: `یہاں ${lat('akhadh')} معیاری تلفظ ہے۔ روزمرہ بول چال میں ${lat('akhaz')} یا ${lat('akaz')} بھی سنائی دے سکتا ہے۔` },
+    i: 'أَخَذْتُ الْكِتَابَ', it: 'akhadhtu l-kitaab', ie: 'I took the book', iu: 'میں نے کتاب لی',
+    g: 'أَخَذَ الطُّلَّابُ الْكُتُبَ', gt: 'akhadha t-tullaabu l-kutub', ge: 'The students took the books', gu: 'طلبہ نے کتابیں لیں' },
+  { ar: 'أَكَل', en: 'ate', ur: 'کھایا', t: 'akal',
+    i: 'أَكَلْتُ التُّفَّاحَةَ', it: 'akaltu t-tuffaahah', ie: 'I ate the apple', iu: 'میں نے سیب کھایا',
+    g: 'أَكَلَ الطُّلَّابُ التُّفَّاحَ', gt: 'akala t-tullaabu t-tuffaah', ge: 'The students ate the apples', gu: 'طلبہ نے سیب کھائے' },
+  { ar: 'كَتَب', en: 'wrote', ur: 'لکھا', t: 'katab',
+    i: 'كَتَبْتُ الرِّسَالَةَ', it: 'katabtu r-risaalah', ie: 'I wrote the letter', iu: 'میں نے خط لکھا',
+    g: 'كَتَبَ الطُّلَّابُ الرَّسَائِلَ', gt: "kataba t-tullaabu r-rasaa'il", ge: 'The students wrote the letters', gu: 'طلبہ نے خط لکھے' },
+  { ar: 'ذَهَب', en: 'went', ur: 'گیا', t: 'dhahab', forms: { m: 'گیا', f: 'گئی', pm: 'گئے', pf: 'گئیں' },
+    i: 'ذَهَبْتُ إِلَى الْمَدْرَسَةِ', it: 'dhahabtu ilaa l-madrasah', ie: 'I went to school', iu: 'میں اسکول گیا / گئی',
+    g: 'ذَهَبَ الطُّلَّابُ إِلَى الْمَدْرَسَةِ', gt: 'dhahaba t-tullaabu ilaa l-madrasah', ge: 'The students went to school', gu: 'طلبہ اسکول گئے' },
+  { ar: 'فَتَح', en: 'opened', ur: 'کھولا', t: 'fatah',
+    i: 'فَتَحْتُ الْبَابَ', it: 'fatahtu l-baab', ie: 'I opened the door', iu: 'میں نے دروازہ کھولا',
+    g: 'فَتَحَ الطُّلَّابُ الْبَابَ', gt: 'fataha t-tullaabu l-baab', ge: 'The students opened the door', gu: 'طلبہ نے دروازہ کھولا' },
+  { ar: 'دَرَس', en: 'studied', ur: 'پڑھا', t: 'daras',
+    i: 'دَرَسْتُ الدَّرْسَ', it: 'darastu d-dars', ie: 'I studied the lesson', iu: 'میں نے سبق پڑھا',
+    g: 'دَرَسَ الطُّلَّابُ الدَّرْسَ', gt: 'darasa t-tullaabu d-dars', ge: 'The students studied the lesson', gu: 'طلبہ نے سبق پڑھا' },
+  { ar: 'نَام', en: 'slept', ur: 'سویا', t: 'naam', short: { ar: 'نِم', t: 'nim' }, forms: { m: 'سویا', f: 'سوئی', pm: 'سوئے', pf: 'سوئیں' },
+    note: { en: 'This verb also changes in the middle. It keeps the long aa in the he, she, and male group they forms. It shortens to nim when the ending starts with a consonant.', ur: `یہ فعل بیچ میں بھی بدلتا ہے۔ «وہ» (مذکر)، «وہ» (مؤنث) اور «وہ» (جمع مذکر) میں لمبی ${lat('aa')} رہتی ہے۔ جب آخری حصہ کسی حرف سے شروع ہو تو یہ ${lat('nim')} بن جاتا ہے۔` },
+    i: 'نِمْتُ فِي الْبَيْتِ', it: 'nimtu fi l-bayt', ie: 'I slept at home', iu: 'میں گھر پر سویا / سوئی',
+    g: 'نَامَ الطُّلَّابُ فِي الْبَيْتِ', gt: 'naama t-tullaabu fi l-bayt', ge: 'The students slept at home', gu: 'طلبہ گھر پر سوئے' }
+];
+
+const urduSubject = {
+  i_m: ['میں نے', 'میں', 'm'], i_f: ['میں نے', 'میں', 'f'], we: ['ہم نے', 'ہم', 'pm'],
+  you_m: ['تم نے', 'تم', 'pm'], you_f: ['تم نے', 'تم', 'pf'],
+  youp_m: ['تم سب نے', 'تم سب', 'pm'], youp_f: ['تم سب نے', 'تم سب', 'pf'],
+  he: ['اس نے', 'وہ', 'm'], she: ['اس نے', 'وہ', 'f'],
+  they_m: ['انہوں نے', 'وہ', 'pm'], they_f: ['انہوں نے', 'وہ', 'pf']
+};
+const urduMeaning = (v, key) => {
+  const s = urduSubject[key];
+  return v.forms ? `${s[1]} ${v.forms[s[2]]}` : `${s[0]} ${v.ur}`;
+};
+
+const persons = [
+  { c: 2, cells: [
+    { r: 2, row: 0, k: 'i_m', p: 'أَنَا', s: 'ْ', e: 'تُ', te: 'tu', who: 'I' },
+    { r: 3, row: 1, k: 'i_f', p: 'أَنَا', s: 'ْ', e: 'تُ', te: 'tu', who: 'I' },
+    { r: 4, span: 2, row: 'group', k: 'we', p: 'نَحْنُ', s: 'ْ', e: 'نَا', te: 'naa', who: 'we' }
+  ]},
+  { c: 3, cells: [
+    { r: 2, row: 0, k: 'you_m', p: 'أَنْتَ', s: 'ْ', e: 'تَ', te: 'ta', who: 'you' },
+    { r: 3, row: 1, k: 'you_f', p: 'أَنْتِ', s: 'ْ', e: 'تِ', te: 'ti', who: 'you' },
+    { r: 4, row: 2, k: 'youp_m', p: 'أَنْتُمْ', s: 'ْ', e: 'تُمْ', te: 'tum', who: 'you all' },
+    { r: 5, row: 3, k: 'youp_f', p: 'أَنْتُنَّ', s: 'ْ', e: 'تُنَّ', te: 'tunna', who: 'you all' }
+  ]},
+  { c: 4, cells: [
+    { r: 2, row: 0, k: 'he', p: 'هُوَ', s: '', e: 'َ', te: 'a', who: 'he' },
+    { r: 3, row: 1, k: 'she', p: 'هِيَ', s: '', e: 'َتْ', te: 'at', who: 'she' },
+    { r: 4, row: 2, k: 'they_m', p: 'هُمْ', s: '', e: 'ُوا', te: 'uu', who: 'they' },
+    { r: 5, row: 3, k: 'they_f', p: 'هُنَّ', s: 'ْ', e: 'نَ', te: 'na', who: 'they' }
+  ]}
+];
+const stops = [
+  { who: 'I', k: 'i_m', s: 'ْ', e: 'تُ', te: 'tu', x: 'تْ', tx: 't' },
+  { who: 'You', k: 'you_m', g: 'gMale', s: 'ْ', e: 'تَ', te: 'ta', x: 'تْ', tx: 't' },
+  { who: 'You', k: 'you_f', g: 'gFemale', s: 'ْ', e: 'تِ', te: 'ti', x: 'تْ', tx: 't' },
+  { who: 'He', k: 'he', s: '', e: 'َ', te: 'a', x: '', tx: '' },
+  { who: 'They', k: 'they_f', g: 'gFemale', s: 'ْ', e: 'نَ', te: 'na', x: 'نْ', tx: 'n' },
+  { who: 'You all', k: 'youp_f', g: 'gFemale', s: 'ْ', e: 'تُنَّ', te: 'tunna', x: 'تُنّْ', tx: 'tunn' }
+];
+
+const $ = id => document.getElementById(id);
+const pickers = [[$('picker'), 'verb-'], [$('picker-context'), 'context-verb-']];
+const wide = $('table-wide');
+const narrow = $('table-narrow');
+const note = $('note');
+const stopBody = $('stop-body');
+
+let lang = 'en';
+let verbIndex = 0;
+let topicId = 'past-tense';
+try {
+  const saved = localStorage.getItem('arabic-timeline-lang');
+  if (saved === 'ur') lang = 'ur';
+} catch (e) {}
+const t = () => T[lang];
+const stem = (v, x) => (x.s && v.short ? v.short : v);
+const meaning = (v, x) => lang === 'ur' ? urduMeaning(v, x.k) : `${x.who} ${v.en}`;
+const exHtml = (arabic, translit, gloss) => `<span class="mini" lang="ar">${arabic}</span><span class="translit">${lat(translit)}${gloss ? ` · ${gloss}` : ''}</span>`;
+
+topics.forEach((topic, n) => {
+  const li = document.createElement('li');
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.id = 'stop-' + topic.id;
+  b.className = 'stop' + (topic.ready ? ' ready' : '');
+  b.innerHTML = `<span class="dot">${n + 1}</span><span class="stop-name"></span><span class="stop-state"></span>`;
+  b.addEventListener('click', () => {
+    showTopic(topic.id);
+    try { location.hash = topic.id; } catch (e) {}
+  });
+  li.appendChild(b);
+  $('timeline').appendChild(li);
+});
+
+narrow.innerHTML = persons.map((p, i) => `<details id="person-${i}"${i === 0 ? ' open' : ''}><summary><span class="sum-title" id="person-title-${i}"></span><span class="sum-sub" id="person-sub-${i}"></span></summary><div class="fold" id="person-body-${i}"></div></details>`).join('');
+
+pickers.forEach(([el, prefix]) => verbs.forEach((v, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.id = prefix + i;
+  b.innerHTML = `<span class="word" lang="ar">${v.ar}</span><span class="verb-label"></span>`;
+  b.addEventListener('click', () => { verbIndex = i; draw(); });
+  el.appendChild(b);
+}));
+
+function showTopic(id) {
+  const topic = topics.find(x => x.id === id) || topics[3];
+  topicId = topic.id;
+  topics.forEach(x => {
+    const b = $('stop-' + x.id);
+    if (x === topic) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+  });
+  $('panel-past-tense').hidden = !topic.ready;
+  $('panel-soon').hidden = !!topic.ready;
+  if (!topic.ready) {
+    $('soon-title').textContent = t().topics[topic.id][0];
+    $('soon-sub').textContent = t().topics[topic.id][1];
+  }
+}
+
+function rowLabel(x) {
+  return x.row === 'group' ? t().group : t().rows[x.row];
+}
+
+function cellHtml(x, v, c, withLabel) {
+  const st = stem(v, x);
+  const chip = /^[َُ]/.test(x.e) ? 'ـ' + x.e : x.e;
+  return `<div class="cell" style="--c:${c};--r:${x.r};--s:${x.span || 1}">
+    ${withLabel ? `<span class="cell-label">${rowLabel(x)}</span>` : ''}
+    <div class="arabic" lang="ar">${x.p} ${st.ar}${x.s}<span class="end">${x.e}</span></div>
+    <div class="meaning"><span>${lat(`<b>${st.t}${x.te}</b>`)} · ${meaning(v, x)}</span><span class="chip" lang="ar">+ ${chip}</span></div>
+  </div>`;
+}
+
+function draw() {
+  const v = verbs[verbIndex];
+  const L = t();
+  pickers.forEach(([el]) => [...el.children].forEach((b, j) => {
+    b.setAttribute('aria-pressed', j === verbIndex ? 'true' : 'false');
+    b.querySelector('.verb-label').textContent = verbs[j][lang];
+  }));
+  wide.innerHTML = '<div style="--c:1;--r:1" aria-hidden="true"></div>'
+    + L.rows.map((l, n) => `<div class="row-label" style="--c:1;--r:${n + 2}">${l}</div>`).join('')
+    + persons.map((p, n) => `<h3 class="person" style="--c:${p.c};--r:1">${L.persons[n][0]}<small>${L.persons[n][1]}</small></h3>` + p.cells.map(x => cellHtml(x, v, p.c, false)).join('')).join('');
+  persons.forEach((p, n) => {
+    $('person-title-' + n).textContent = L.persons[n][0];
+    $('person-sub-' + n).textContent = L.persons[n][1];
+    $('person-body-' + n).innerHTML = p.cells.map(x => cellHtml(x, v, p.c, true)).join('');
+  });
+  note.innerHTML = v.note ? v.note[lang] : '';
+  note.hidden = !v.note;
+
+  stopBody.innerHTML = stops.map(r => {
+    const st = stem(v, r);
+    const g = r.g ? L[r.g] : '';
+    return `<tr><td>${meaning(v, r)}${g}</td><td><span class="mini" lang="ar">${st.ar}${r.s}<span class="end">${r.e}</span></span><span class="translit">${lat(st.t + r.te)}</span></td><td><span class="mini" lang="ar">${st.ar}ْ<span class="end">${r.x}</span></span><span class="translit">${lat(st.t + r.tx)}</span></td></tr>`;
+  }).join('');
+
+  const s = v.short || v;
+  const iLabel = meaning(v, stops[0]);
+  const youLabel = meaning(v, stops[1]) + L.gMale;
+  $('why-block').innerHTML = `<div class="topic"><h4>${L.whyH}</h4><p class="note">${L.whyP}</p><div class="pairs"><div class="pair"><span class="cell-label">${iLabel}</span><span class="mini" lang="ar">${s.ar}ْتُ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'tu', s.t + 't')}</span></div><div class="pair"><span class="cell-label">${youLabel}</span><span class="mini" lang="ar">${s.ar}ْتَ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'ta', s.t + 't')}</span></div></div><p class="note">${L.whyNote}</p></div><div class="topic"><h4>${L.alifH}</h4><p class="note">${L.alifP}</p><div class="pairs"><div class="pair"><span class="cell-label">${L.anaLabel}</span><span class="mini" lang="ar">أَنَا ${s.ar}ْتُ</span><span class="translit">${lat('ana ' + s.t + 'tu')}</span></div><div class="pair"><span class="cell-label">${L.naLabel}</span><span class="mini" lang="ar">${s.ar}ْنَا</span><span class="translit">${L.naText(s.t + 'naa', s.t + 'na')}</span></div></div></div>`;
+
+  $('ex-pronoun').innerHTML = exHtml(v.i, v.it, lang === 'ur' ? v.iu : v.ie);
+  $('ex-noun').innerHTML = `<span class="mini" lang="ar">نَحْنُ ← نَحْنْ</span><span class="translit">${L.becomes('nahnu', 'nahn')}</span>`;
+  $('ex-tanween').innerHTML = `<span class="mini" lang="ar">مَدْرَسَةٌ ← مَدْرَسَهْ</span><span class="translit">${L.becomes('madrasatun', 'madrasah')}</span>`;
+  $('ex-group').innerHTML = exHtml(v.g, v.gt, lang === 'ur' ? v.gu : v.ge);
+}
+
+function applyLanguage() {
+  const L = t();
+  const page = $('page');
+  page.lang = lang;
+  page.dir = lang === 'ur' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = L[el.dataset.t]; });
+  document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', L[el.dataset.aria]));
+  pickers.forEach(([el]) => el.setAttribute('aria-label', L.pickVerb));
+  $('lang-en').setAttribute('aria-pressed', lang === 'en' ? 'true' : 'false');
+  $('lang-ur').setAttribute('aria-pressed', lang === 'ur' ? 'true' : 'false');
+  topics.forEach(topic => {
+    const b = $('stop-' + topic.id);
+    b.querySelector('.stop-name').textContent = L.topics[topic.id][0];
+    b.querySelector('.stop-state').textContent = topic.ready ? L.ready : L.comingSoon;
+  });
+  draw();
+  showTopic(topicId);
+}
+
+function setLanguage(next) {
+  lang = next;
+  try { localStorage.setItem('arabic-timeline-lang', next); } catch (e) {}
+  applyLanguage();
+}
+$('lang-en').addEventListener('click', () => setLanguage('en'));
+$('lang-ur').addEventListener('click', () => setLanguage('ur'));
+
+topicId = location.hash.slice(1) || 'past-tense';
+applyLanguage();
+window.addEventListener('hashchange', () => showTopic(location.hash.slice(1)));
+</script>
+</body>
+</html>
