@@ -84,7 +84,8 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .picker button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .word { font-family: var(--arabic); font-size: 1.3rem; line-height: 1.4; font-weight: 400; }
 
-.context-head { text-align: center; }
+.context-head { text-align: center; margin-top: 2rem; }
+.context-note { margin: 0.1rem 0 0; font-size: 1.1rem; font-weight: 500; }
 .context-head .sub { margin-inline: auto; }
 .picker-center { justify-content: center; }
 .alif-list { display: grid; gap: 0.5rem; }
@@ -95,7 +96,7 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .alif-form:last-child { border-inline-end: 0; }
 .alif-form .mini { display: block; text-align: center; }
 .alif-form .translit, .alif-form .cell-label { text-align: center; }
-.group-head { margin: 0.25rem 0 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; text-wrap: balance; }
+.group-head { margin: 0; font-size: 1.75rem; font-weight: 700; line-height: 1.3; text-wrap: balance; }
 .table-wide { display: none; }
 .table-narrow { display: grid; gap: 0.5rem; }
 .person { margin: 0; font-size: 1.02rem; font-weight: 700; }
@@ -118,7 +119,7 @@ summary::-webkit-details-marker { display: none; }
 summary::after { content: ""; position: absolute; inset-inline-end: 1rem; top: 50%; width: 0.55rem; height: 0.55rem; margin-top: -0.4rem; border-right: 2px solid var(--soft); border-bottom: 2px solid var(--soft); transform: rotate(45deg); }
 details[open] > summary::after { transform: rotate(225deg); margin-top: -0.1rem; }
 summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
-.sum-title { display: block; font-weight: 700; line-height: 1.3; }
+.sum-title { display: block; font-size: 1.15rem; font-weight: 700; line-height: 1.3; }
 .sum-sub { display: block; font-size: 0.875rem; color: var(--soft); line-height: 1.35; }
 .fold { display: grid; gap: 0.75rem; padding: 0 0.85rem 0.85rem; min-width: 0; }
 .table-narrow .fold { gap: 0; padding: 0; }
@@ -140,7 +141,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .mini { font-family: var(--arabic); font-size: 1.4rem; line-height: 1.6; direction: rtl; }
 .translit { display: block; font-size: 0.85rem; color: var(--soft); }
 .items { list-style: none; margin: 0; padding: 0; display: grid; }
-.items li { display: grid; gap: 0.35rem; padding-block: 0.8rem; border-top: 1px solid var(--line); min-width: 0; }
+.items li { display: grid; gap: 0.35rem; min-width: 0; }
 .items h3 { margin: 0; font-size: 1rem; font-weight: 700; }
 .items p { color: var(--soft); max-width: 65ch; }
 .ex .mini { display: block; text-align: right; }
@@ -160,7 +161,10 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] .stop-state { font-size: 0.7rem; }
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
-.page[lang="ur"] .group-head, .page[lang="ur"] .person, .page[lang="ur"] .sum-title { font-size: 0.95rem; }
+.page[lang="ur"] .person { font-size: 0.95rem; }
+.page[lang="ur"] .group-head { font-size: 1.45rem; }
+.page[lang="ur"] .sum-title { font-size: 1.05rem; }
+.page[lang="ur"] .context-note { font-size: 0.95rem; line-height: 2.2; }
 .page[lang="ur"] .note, .page[lang="ur"] .meaning, .page[lang="ur"] .translit, .page[lang="ur"] .sum-sub { font-size: 0.88rem; }
 .page[lang="ur"] .pair, .page[lang="ur"] .cell { gap: 0.5rem; }
 .nb { white-space: nowrap; }
@@ -216,6 +220,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 
     <div class="context-head">
       <h3 class="group-head" data-t="contextHead"></h3>
+      <p class="context-note" data-t="contextNote"></p>
       <p class="sub" data-t="contextSub"></p>
     </div>
     <div class="picker picker-center" id="picker-context" role="group"></div>
@@ -235,10 +240,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
       <summary><span class="sum-title" data-t="droppedTitle"></span><span class="sum-sub" data-t="droppedSub"></span></summary>
       <div class="fold">
         <ul class="items">
-          <li><h3 data-t="dPronounH"></h3><p data-t="dPronounP"></p><div class="ex" id="ex-pronoun"></div></li>
-          <li><h3 data-t="dNounH"></h3><p data-t="dNounP"></p><div class="ex" id="ex-noun"></div></li>
-          <li><h3 data-t="dTanweenH"></h3><p data-t="dTanweenP"></p><div class="ex" id="ex-tanween"></div></li>
-          <li><h3 data-t="dGroupH"></h3><p data-t="dGroupP"></p><div class="ex" id="ex-group"></div></li>
+          <li><p data-t="dPronounP"></p><div class="ex" id="ex-pronoun"></div></li>
         </ul>
       </div>
     </details>
@@ -266,7 +268,8 @@ const T = {
     pastTitle: 'Past tense table',
     pastSub: 'Pick a verb. The colored ending shows who did the action.',
     pickVerb: 'Choose a verb',
-    contextHead: "Teacher's notes: context and dialect",
+    contextHead: "Teacher's remarks",
+    contextNote: '(all points made in class)',
     contextSub: 'Pick a verb to update the examples below.',
     sukoonTitle: 'When a vowel becomes sukoon',
     sukoonSub: 'How endings sound when you stop after a word',
@@ -276,16 +279,9 @@ const T = {
     colFull: 'Full form',
     colStop: 'At a stop',
     noChange: `These stay the same because they already end in sukoon or a long vowel: ${lat('-tum, -at, -naa, -uu')}.`,
-    droppedTitle: 'Other things that get dropped',
-    droppedSub: 'Pronouns, noun vowels, nunation, and group endings',
-    dPronounH: 'The pronoun',
+    droppedTitle: 'The pronoun is inside the verb',
+    droppedSub: 'The ending already says I, you, he, or she',
     dPronounP: `The ending already shows who did the action, so ${ar('أَنَا')} and ${ar('هُوَ')} are usually left out. Keep them for emphasis.`,
-    dNounH: "A noun's last vowel",
-    dNounP: 'The stop rule also applies to nouns and pronouns. In the example above, the verb keeps its damma in the middle of the sentence. The last word loses its final vowel at the stop.',
-    dTanweenH: 'Nunation and the sound of ة',
-    dTanweenP: `At a stop, ${lat('-un')} and ${lat('-in')} disappear, ${lat('-an')} becomes a long ${lat('-aa')}, and ة sounds like a soft h.`,
-    dGroupH: 'The group ending',
-    dGroupP: `When the verb comes before a named group, it stays singular. It still shows gender, so a female group keeps ${lat('-at')}.`,
     alifVerbsTitle: 'Verbs with alif',
     alifVerbsSub: 'When the alif drops and when it comes back',
     alifVerbsNote: `Slept and came lose the middle alif in first and second person, then get it back in third person. It also drops for they (female): ${ar('نِمْنَ')}, ${ar('جِئْنَ')}. Ate keeps its alif because it is the first letter, not a middle alif.`,
@@ -318,7 +314,8 @@ const T = {
     pastTitle: 'ماضی کا جدول',
     pastSub: 'کوئی فعل چنیں۔ رنگین آخری حصہ بتاتا ہے کہ کام کس نے کیا۔',
     pickVerb: 'فعل چنیں',
-    contextHead: 'استاد کے نکات: سیاق و سباق اور لہجہ',
+    contextHead: 'استاد کے نکات',
+    contextNote: '(کلاس میں بتائے گئے تمام نکات)',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
     sukoonTitle: 'جب حرکت سکون میں بدل جائے',
     sukoonSub: 'لفظ پر رکنے سے آخری آواز کیسے بدلتی ہے',
@@ -328,16 +325,9 @@ const T = {
     colFull: 'پوری شکل',
     colStop: 'رکنے پر',
     noChange: `یہ نہیں بدلتے، کیونکہ ان کے آخر میں پہلے سے سکون یا لمبی آواز ہے: <span class="nb">${lat('-tum, -at, -naa, -uu')}</span>۔`,
-    droppedTitle: 'اور کیا چیزیں چھوڑی جاتی ہیں',
-    droppedSub: 'ضمیر، اسم کی حرکت، تنوین اور جمع کا آخری حصہ',
-    dPronounH: 'ضمیر',
+    droppedTitle: 'ضمیر فعل کے اندر ہوتا ہے',
+    droppedSub: 'آخری حصہ ہی بتا دیتا ہے: میں، تم، وہ',
     dPronounP: `آخری حصے سے پتا چل جاتا ہے کہ کام کس نے کیا، اس لیے ${ar('أَنَا')} اور ${ar('هُوَ')} عام طور پر چھوڑ دیے جاتے ہیں۔ زور دینے کے لیے انہیں رکھا جاتا ہے۔`,
-    dNounH: 'اسم کی آخری حرکت',
-    dNounP: 'رکنے کا یہی اصول اسموں اور ضمیروں پر بھی لگتا ہے۔ اوپر کی مثال میں جملے کے بیچ فعل اپنا پیش رکھتا ہے۔ آخری لفظ رکنے پر اپنی آخری حرکت کھو دیتا ہے۔',
-    dTanweenH: 'تنوین اور ة کی آواز',
-    dTanweenP: `رکنے پر ${lat('-un')} اور ${lat('-in')} ہٹ جاتے ہیں، ${lat('-an')} لمبا ${lat('-aa')} بن جاتا ہے، اور ة ہلکی ہ کی طرح بولی جاتی ہے۔`,
-    dGroupH: 'جمع کا آخری حصہ',
-    dGroupP: `جب فعل کسی نام والے گروہ سے پہلے آئے تو واحد رہتا ہے۔ جنس پھر بھی ظاہر ہوتی ہے، اس لیے مؤنث گروہ میں ${lat('-at')} رہتا ہے۔`,
     alifVerbsTitle: 'الف والے فعل',
     alifVerbsSub: 'الف کب ہٹتا ہے اور کب واپس آتا ہے',
     alifVerbsNote: `سویا اور آیا میں بیچ کا الف پہلے اور دوسرے شخص میں ہٹ جاتا ہے، پھر تیسرے شخص میں واپس آتا ہے۔ «وہ» (جمع مؤنث) میں بھی یہ ہٹ جاتا ہے: ${ar('نِمْنَ')}، ${ar('جِئْنَ')}۔ کھایا میں الف رہتا ہے، کیونکہ وہ پہلا حرف ہے، بیچ کا الف نہیں۔`,
@@ -541,9 +531,6 @@ function draw() {
   $('why-block').innerHTML = `<div class="topic"><h4>${L.whyH}</h4><p class="note">${L.whyP}</p><div class="pairs"><div class="pair"><span class="cell-label">${iLabel}</span><span class="mini" lang="ar">${s.ar}ْتُ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'tu', s.t + 't')}</span></div><div class="pair"><span class="cell-label">${youLabel}</span><span class="mini" lang="ar">${s.ar}ْتَ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'ta', s.t + 't')}</span></div></div><p class="note">${L.whyNote}</p></div><div class="topic"><h4>${L.alifH}</h4><p class="note">${L.alifP}</p><div class="pairs"><div class="pair"><span class="cell-label">${L.anaLabel}</span><span class="mini" lang="ar">أَنَا ${s.ar}ْتُ</span><span class="translit">${lat('ana ' + s.t + 'tu')}</span></div><div class="pair"><span class="cell-label">${L.naLabel}</span><span class="mini" lang="ar">${s.ar}ْنَا</span><span class="translit">${L.naText(s.t + 'naa', s.t + 'na')}</span></div></div></div>`;
 
   $('ex-pronoun').innerHTML = exHtml(v.i, v.it, lang === 'ur' ? v.iu : v.ie);
-  $('ex-noun').innerHTML = `<span class="mini" lang="ar">نَحْنُ ← نَحْنْ</span><span class="translit">${L.becomes('nahnu', 'nahn')}</span>`;
-  $('ex-tanween').innerHTML = `<span class="mini" lang="ar">مَدْرَسَةٌ ← مَدْرَسَهْ</span><span class="translit">${L.becomes('madrasatun', 'madrasah')}</span>`;
-  $('ex-group').innerHTML = exHtml(v.g, v.gt, lang === 'ur' ? v.gu : v.ge);
 }
 
 const alifVerbs = [
