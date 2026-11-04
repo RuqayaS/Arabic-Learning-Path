@@ -729,9 +729,9 @@ function renderLessons() {
     <p class="source">${S.source}</p>`;
   $('gen-body').innerHTML = `<h3 class="sec-head">${S.genH}</h3><ul class="gen-list">${S.genList.map(x => `<li>${x}</li>`).join('')}</ul>
     ${foldHtml('gen-people', S.tPeople, S.tPeopleS, twoCol(GEN.people, S.male, S.female), true)}
+    ${foldHtml('gen-things', S.tThings, S.tThingsS, twoCol(GEN.things, S.male, S.female), false)}
     ${foldHtml('gen-groups', S.tGroups, S.tGroupsS, twoCol(GEN.groups, S.maleMixed, S.female), false)}
     ${foldHtml('gen-names', S.tNames, S.tNamesS, twoCol(GEN.names, S.male, S.female), false)}
-    ${foldHtml('gen-things', S.tThings, S.tThingsS, twoCol(GEN.things, S.male, S.female), false)}
     <p class="source">${S.source}</p>`;
   $('demo-sub').textContent = S.demoSub;
   $('pron-sub').textContent = S.pronSub;
