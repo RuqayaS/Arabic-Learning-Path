@@ -146,6 +146,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .items p { color: var(--soft); max-width: 65ch; }
 .ex .mini { display: block; text-align: right; }
 .ex .translit { text-align: right; }
+#ex-pronoun { display: grid; gap: 0.6rem; }
 
 /* Nastaliq needs far more vertical room than Latin text. */
 .page[lang="ur"] { font-family: var(--urdu); line-height: 2.2; font-size: 0.94rem; }
@@ -387,6 +388,16 @@ const verbs = [
     g: 'نَامَ الطُّلَّابُ فِي الْبَيْتِ', gt: 'naama t-tullaabu fi l-bayt', ge: 'The students slept at home', gu: 'طلبہ گھر پر سوئے' }
 ];
 
+const pronounExamples = {
+  akhadh: { she: ['أَخَذَتِ الْكِتَابَ', 'akhadhat il-kitaab', 'She took the book', 'اس نے کتاب لی'], we: ['أَخَذْنَا الْكِتَابَ', 'akhadhnaa l-kitaab', 'We took the book', 'ہم نے کتاب لی'] },
+  akal: { she: ['أَكَلَتِ التُّفَّاحَةَ', 'akalat it-tuffaahah', 'She ate the apple', 'اس نے سیب کھایا'], we: ['أَكَلْنَا التُّفَّاحَةَ', 'akalnaa t-tuffaahah', 'We ate the apple', 'ہم نے سیب کھایا'] },
+  katab: { she: ['كَتَبَتِ الرِّسَالَةَ', 'katabat ir-risaalah', 'She wrote the letter', 'اس نے خط لکھا'], we: ['كَتَبْنَا الرِّسَالَةَ', 'katabnaa r-risaalah', 'We wrote the letter', 'ہم نے خط لکھا'] },
+  dhahab: { she: ['ذَهَبَتْ إِلَى الْمَدْرَسَةِ', 'dhahabat ilaa l-madrasah', 'She went to school', 'وہ اسکول گئی'], we: ['ذَهَبْنَا إِلَى الْمَدْرَسَةِ', 'dhahabnaa ilaa l-madrasah', 'We went to school', 'ہم اسکول گئے'] },
+  fatah: { she: ['فَتَحَتِ الْبَابَ', 'fatahat il-baab', 'She opened the door', 'اس نے دروازہ کھولا'], we: ['فَتَحْنَا الْبَابَ', 'fatahnaa l-baab', 'We opened the door', 'ہم نے دروازہ کھولا'] },
+  daras: { she: ['دَرَسَتِ الدَّرْسَ', 'darasat id-dars', 'She studied the lesson', 'اس نے سبق پڑھا'], we: ['دَرَسْنَا الدَّرْسَ', 'darasnaa d-dars', 'We studied the lesson', 'ہم نے سبق پڑھا'] },
+  naam: { she: ['نَامَتْ فِي الْبَيْتِ', 'naamat fi l-bayt', 'She slept at home', 'وہ گھر پر سوئی'], we: ['نِمْنَا فِي الْبَيْتِ', 'nimnaa fi l-bayt', 'We slept at home', 'ہم گھر پر سوئے'] }
+};
+
 const urduSubject = {
   i_m: ['میں نے', 'میں', 'm'], i_f: ['میں نے', 'میں', 'f'], we: ['ہم نے', 'ہم', 'pm'],
   you_m: ['تم نے', 'تم', 'pm'], you_f: ['تم نے', 'تم', 'pf'],
@@ -530,7 +541,8 @@ function draw() {
   const youLabel = meaning(v, stops[1]) + L.gMale;
   $('why-block').innerHTML = `<div class="topic"><h4>${L.whyH}</h4><p class="note">${L.whyP}</p><div class="pairs"><div class="pair"><span class="cell-label">${iLabel}</span><span class="mini" lang="ar">${s.ar}ْتُ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'tu', s.t + 't')}</span></div><div class="pair"><span class="cell-label">${youLabel}</span><span class="mini" lang="ar">${s.ar}ْتَ ← ${s.ar}ْتْ</span><span class="translit">${L.becomes(s.t + 'ta', s.t + 't')}</span></div></div><p class="note">${L.whyNote}</p></div><div class="topic"><h4>${L.alifH}</h4><p class="note">${L.alifP}</p><div class="pairs"><div class="pair"><span class="cell-label">${L.anaLabel}</span><span class="mini" lang="ar">أَنَا ${s.ar}ْتُ</span><span class="translit">${lat('ana ' + s.t + 'tu')}</span></div><div class="pair"><span class="cell-label">${L.naLabel}</span><span class="mini" lang="ar">${s.ar}ْنَا</span><span class="translit">${L.naText(s.t + 'naa', s.t + 'na')}</span></div></div></div>`;
 
-  $('ex-pronoun').innerHTML = exHtml(v.i, v.it, lang === 'ur' ? v.iu : v.ie);
+  const more = pronounExamples[v.t];
+  $('ex-pronoun').innerHTML = [[v.i, v.it, v.ie, v.iu], more.she, more.we].map(x => `<div>${exHtml(x[0], x[1], lang === 'ur' ? x[3] : x[2])}</div>`).join('');
 }
 
 const alifVerbs = [
