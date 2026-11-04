@@ -84,6 +84,17 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .picker button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .word { font-family: var(--arabic); font-size: 1.3rem; line-height: 1.4; font-weight: 400; }
 
+.context-head { text-align: center; }
+.context-head .sub { margin-inline: auto; }
+.picker-center { justify-content: center; }
+.alif-list { display: grid; gap: 0.5rem; }
+.alif-verb { border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.alif-name { padding: 0.35rem 0.65rem; font-weight: 700; border-bottom: 1px solid var(--line); }
+.alif-forms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.alif-form { display: grid; align-content: start; gap: 0.1rem; padding: 0.5rem 0.65rem; min-width: 0; border-inline-end: 1px solid var(--line); }
+.alif-form:last-child { border-inline-end: 0; }
+.alif-form .mini { display: block; text-align: center; }
+.alif-form .translit, .alif-form .cell-label { text-align: center; }
 .group-head { margin: 0.25rem 0 0; font-size: 1.05rem; font-weight: 700; line-height: 1.3; text-wrap: balance; }
 .table-wide { display: none; }
 .table-narrow { display: grid; gap: 0.5rem; }
@@ -203,11 +214,11 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
     <div class="table-narrow" id="table-narrow"></div>
     <p class="note" id="note" hidden></p>
 
-    <div>
+    <div class="context-head">
       <h3 class="group-head" data-t="contextHead"></h3>
       <p class="sub" data-t="contextSub"></p>
     </div>
-    <div class="picker" id="picker-context" role="group"></div>
+    <div class="picker picker-center" id="picker-context" role="group"></div>
 
     <details id="fold-sukoon">
       <summary><span class="sum-title" data-t="sukoonTitle"></span><span class="sum-sub" data-t="sukoonSub"></span></summary>
@@ -231,6 +242,14 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
         </ul>
       </div>
     </details>
+
+    <details id="fold-alif">
+      <summary><span class="sum-title" data-t="alifVerbsTitle"></span><span class="sum-sub" data-t="alifVerbsSub"></span></summary>
+      <div class="fold">
+        <div class="alif-list" id="alif-verbs"></div>
+        <p class="note" data-t="alifVerbsNote"></p>
+      </div>
+    </details>
   </section>
 </main>
 
@@ -247,7 +266,7 @@ const T = {
     pastTitle: 'Past tense table',
     pastSub: 'Pick a verb. The colored ending shows who did the action.',
     pickVerb: 'Choose a verb',
-    contextHead: "How things can change based on context and dialect (all teacher's remarks and points made in class)",
+    contextHead: "Teacher's notes: context and dialect",
     contextSub: 'Pick a verb to update the examples below.',
     sukoonTitle: 'When a vowel becomes sukoon',
     sukoonSub: 'How endings sound when you stop after a word',
@@ -267,6 +286,9 @@ const T = {
     dTanweenP: `At a stop, ${lat('-un')} and ${lat('-in')} disappear, ${lat('-an')} becomes a long ${lat('-aa')}, and ة sounds like a soft h.`,
     dGroupH: 'The group ending',
     dGroupP: `When the verb comes before a named group, it stays singular. It still shows gender, so a female group keeps ${lat('-at')}.`,
+    alifVerbsTitle: 'Verbs with alif',
+    alifVerbsSub: 'When the alif drops and when it comes back',
+    alifVerbsNote: `Slept and came lose the middle alif in first and second person, then get it back in third person. It also drops for they (female): ${ar('نِمْنَ')}, ${ar('جِئْنَ')}. Ate keeps its alif because it is the first letter, not a middle alif.`,
     whyH: 'Why I and you (male) can sound the same',
     whyP: 'When you stop on a word in Arabic, you usually don\'t say its short last vowel. The damma in the I form and the fatha in the you form both drop, so ت gets a sukoon in both. The you (female) form usually does the same.',
     whyNote: 'The sentence usually shows who is meant. If it doesn\'t, speakers often keep the vowel.',
@@ -296,7 +318,7 @@ const T = {
     pastTitle: 'ماضی کا جدول',
     pastSub: 'کوئی فعل چنیں۔ رنگین آخری حصہ بتاتا ہے کہ کام کس نے کیا۔',
     pickVerb: 'فعل چنیں',
-    contextHead: 'سیاق و سباق اور لہجے کے مطابق تبدیلیاں (استاد کی تمام باتیں اور کلاس کے نکات)',
+    contextHead: 'استاد کے نکات: سیاق و سباق اور لہجہ',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
     sukoonTitle: 'جب حرکت سکون میں بدل جائے',
     sukoonSub: 'لفظ پر رکنے سے آخری آواز کیسے بدلتی ہے',
@@ -316,6 +338,9 @@ const T = {
     dTanweenP: `رکنے پر ${lat('-un')} اور ${lat('-in')} ہٹ جاتے ہیں، ${lat('-an')} لمبا ${lat('-aa')} بن جاتا ہے، اور ة ہلکی ہ کی طرح بولی جاتی ہے۔`,
     dGroupH: 'جمع کا آخری حصہ',
     dGroupP: `جب فعل کسی نام والے گروہ سے پہلے آئے تو واحد رہتا ہے۔ جنس پھر بھی ظاہر ہوتی ہے، اس لیے مؤنث گروہ میں ${lat('-at')} رہتا ہے۔`,
+    alifVerbsTitle: 'الف والے فعل',
+    alifVerbsSub: 'الف کب ہٹتا ہے اور کب واپس آتا ہے',
+    alifVerbsNote: `سویا اور آیا میں بیچ کا الف پہلے اور دوسرے شخص میں ہٹ جاتا ہے، پھر تیسرے شخص میں واپس آتا ہے۔ «وہ» (جمع مؤنث) میں بھی یہ ہٹ جاتا ہے: ${ar('نِمْنَ')}، ${ar('جِئْنَ')}۔ کھایا میں الف رہتا ہے، کیونکہ وہ پہلا حرف ہے، بیچ کا الف نہیں۔`,
     whyH: 'میں اور تم (مذکر) ایک جیسے کیوں سنائی دے سکتے ہیں',
     whyP: 'عربی میں لفظ پر رکتے وقت چھوٹی آخری حرکت عام طور پر نہیں بولی جاتی۔ «میں» والی شکل کا پیش اور «تم» والی شکل کا زبر دونوں ہٹ جاتے ہیں، اس لیے دونوں میں ت پر سکون آ جاتا ہے۔ «تم» (مؤنث) میں بھی عام طور پر یہی ہوتا ہے۔',
     whyNote: 'جملے سے عام طور پر پتا چل جاتا ہے کہ بات کس کی ہو رہی ہے۔ اگر نہ چلے تو بولنے والے اکثر حرکت باقی رکھتے ہیں۔',
@@ -521,8 +546,20 @@ function draw() {
   $('ex-group').innerHTML = exHtml(v.g, v.gt, lang === 'ur' ? v.gu : v.ge);
 }
 
+const alifVerbs = [
+  { v: verbs[6], forms: [['نِمْتُ', 'nimtu'], ['نِمْتَ', 'nimta'], ['نَ<span class="end">ا</span>مَ', 'naama']] },
+  { v: { en: 'came', ur: 'آیا', forms: { m: 'آیا', f: 'آئی', pm: 'آئے', pf: 'آئیں' } }, forms: [['جِئْتُ', "ji'tu"], ['جِئْتَ', "ji'ta"], ['جَ<span class="end">ا</span>ءَ', "jaa'a"]] },
+  { v: verbs[1], forms: [['<span class="end">أَ</span>كَلْتُ', 'akaltu'], ['<span class="end">أَ</span>كَلْتَ', 'akalta'], ['<span class="end">أَ</span>كَلَ', 'akala']] }
+];
+function alifHtml() {
+  const L = t();
+  const whos = [{ who: 'I', k: 'i_m' }, { who: 'You', k: 'you_m', g: L.gMale }, { who: 'He', k: 'he' }];
+  return alifVerbs.map(({ v, forms }) => `<div class="alif-verb"><div class="alif-name">${v[lang]}</div><div class="alif-forms">${forms.map((f, n) => `<div class="alif-form"><span class="cell-label">${L.persons[n][0]}</span><span class="mini" lang="ar">${f[0]}</span><span class="translit">${lat(f[1])}<br>${meaning(v, whos[n])}${whos[n].g || ''}</span></div>`).join('')}</div></div>`).join('');
+}
+
 function applyLanguage() {
   const L = t();
+  $('alif-verbs').innerHTML = alifHtml();
   const page = $('page');
   page.lang = lang;
   page.dir = lang === 'ur' ? 'rtl' : 'ltr';
