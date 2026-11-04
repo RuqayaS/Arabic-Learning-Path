@@ -97,6 +97,10 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .alif-form .mini { display: block; text-align: center; }
 .alif-form .translit, .alif-form .cell-label { text-align: center; }
 .lesson, .fold-list { display: grid; gap: 0.75rem; min-width: 0; }
+.callout { display: grid; gap: 0.5rem; padding: 0.85rem; background: var(--accent-bg); border: 1px solid var(--accent); border-radius: 6px; min-width: 0; }
+.callout h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+.callout p { margin: 0; max-width: 65ch; }
+.callout .ex-list li { background: var(--surface); }
 .lesson-text { margin: 0; max-width: 65ch; }
 .sec-head { margin: 0.5rem 0 0; font-size: 1.15rem; font-weight: 700; }
 .source { margin: 0; font-size: 0.8rem; color: var(--soft); }
@@ -184,6 +188,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
+.page[lang="ur"] .callout h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
 .page[lang="ur"] .source { font-size: 0.75rem; }
 .page[lang="ur"] .lat { line-height: 1.5; }
@@ -582,6 +587,8 @@ const LS = {
     demoIntro: 'Arabic picks the word based on three things: how near it is, whether it is male or female, and whether you mean people or things.',
     tableWord: 'What you mean', near: 'Near', far: 'Far', notCovered: 'Not in this lecture',
     rows: ['One male person or thing', 'One female person or thing', 'Many things (non-living)', 'Many people'],
+    pointH: "Teacher's point: non-living things are referred to as female",
+    pointP: `When you talk about many non-living things, treat them as female. That is why "these books" uses ${ar('هَذِي')}, the same word as the female "this".`,
     thoseNote: 'This lecture teaches this, these, and that. It doesn\'t cover those yet.',
     thisT: 'This: هَذَا and هَذِي', thisS: 'One person or thing near you',
     thisP: `Use ${ar('هَذَا')} for one male person or thing. Use ${ar('هَذِي')} for one female person or thing. Things have a gender too: a book is male, and a car is female.`,
@@ -611,6 +618,8 @@ const LS = {
     demoIntro: 'عربی میں لفظ تین باتوں سے چنا جاتا ہے: چیز کتنی قریب ہے، مذکر ہے یا مؤنث، اور بات لوگوں کی ہے یا چیزوں کی۔',
     tableWord: 'آپ کا مطلب', near: 'قریب', far: 'دور', notCovered: 'اس لیکچر میں نہیں',
     rows: ['ایک مذکر شخص یا چیز', 'ایک مؤنث شخص یا چیز', 'کئی چیزیں (بے جان)', 'کئی لوگ'],
+    pointH: 'استاد کا نکتہ: بے جان چیزوں کو مؤنث مانا جاتا ہے',
+    pointP: `جب کئی بے جان چیزوں کی بات ہو تو انہیں مؤنث مانیں۔ اسی لیے «یہ کتابیں» میں ${ar('هَذِي')} آتا ہے، جو ایک مؤنث کے لیے بھی آتا ہے۔`,
     thoseNote: 'یہ لیکچر this، these اور that سکھاتا ہے۔ those ابھی اس میں شامل نہیں۔',
     thisT: 'یہ (ایک): هَذَا اور هَذِي', thisS: 'قریب کا ایک شخص یا چیز',
     thisP: `ایک مذکر شخص یا چیز کے لیے ${ar('هَذَا')} استعمال کریں۔ ایک مؤنث شخص یا چیز کے لیے ${ar('هَذِي')} استعمال کریں۔ چیزوں کی بھی جنس ہوتی ہے: کتاب مذکر ہے اور گاڑی مؤنث۔`,
@@ -705,6 +714,7 @@ function renderLessons() {
   const S = LS[lang];
   $('demo-body').innerHTML = `<p class="lesson-text">${S.demoIntro}</p>
     <div class="stop-wrap"><table class="word-table three"><thead><tr><th scope="col">${S.tableWord}</th><th scope="col">${S.near}</th><th scope="col">${S.far}</th></tr></thead><tbody>${DEMO.matrix.map((r, i) => `<tr><td>${S.rows[i]}</td><td><span class="mini" lang="ar">${r[0]}</span></td><td>${r[1] ? `<span class="mini" lang="ar">${r[1]}</span>` : `<span class="dash">${S.notCovered}</span>`}</td></tr>`).join('')}</tbody></table></div>
+    <div class="callout"><h3>${S.pointH}</h3><p>${S.pointP}</p>${exList(DEMO.these.slice(0, 3))}</div>
     <p class="note">${S.thoseNote}</p>
     ${foldHtml('demo-this', S.thisT, S.thisS, `<p class="note">${S.thisP}</p>${exList(DEMO.this)}`, true)}
     ${foldHtml('demo-these', S.theseT, S.theseS, `<p class="note">${S.theseP}</p>${exList(DEMO.these)}`, false)}
