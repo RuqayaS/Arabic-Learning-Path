@@ -96,6 +96,27 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .alif-form:last-child { border-inline-end: 0; }
 .alif-form .mini { display: block; text-align: center; }
 .alif-form .translit, .alif-form .cell-label { text-align: center; }
+.lesson, .fold-list { display: grid; gap: 0.75rem; min-width: 0; }
+.lesson-text { margin: 0; max-width: 65ch; }
+.sec-head { margin: 0.5rem 0 0; font-size: 1.15rem; font-weight: 700; }
+.source { margin: 0; font-size: 0.8rem; color: var(--soft); }
+.sum-ar { font-family: var(--arabic); font-size: 1.35rem; font-weight: 400; }
+.ex-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.5rem; }
+.ex-list li { border: 1px solid var(--line); border-radius: 6px; padding: 0.4rem 0.7rem; min-width: 0; }
+.ex-list .mini, .word-table .mini { display: block; }
+.ex-list .translit { display: block; }
+.word-table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.word-table th, .word-table td { padding: 0.45rem 0.65rem; text-align: start; vertical-align: middle; border-bottom: 1px solid var(--line); border-inline-end: 1px solid var(--line); overflow-wrap: anywhere; }
+.word-table tr:last-child td { border-bottom: 0; }
+.word-table th:last-child, .word-table td:last-child { border-inline-end: 0; }
+.word-table th { font-weight: 700; font-size: 0.9rem; }
+.word-table.three td:first-child { font-size: 0.9rem; font-weight: 500; }
+.dash { color: var(--soft); font-size: 0.85rem; }
+.gen-list { margin: 0; padding-inline-start: 1.25rem; display: grid; gap: 0.3rem; max-width: 65ch; }
+.reading { display: grid; gap: 0.5rem; padding: 0.85rem; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.reading .sec-head { margin: 0; }
+.reading-ar { margin: 0; font-family: var(--arabic); font-size: 1.5rem; line-height: 2.1; text-align: right; }
+.reading details { background: none; }
 .group-head { margin: 0; font-size: 1.75rem; font-weight: 700; line-height: 1.3; text-wrap: balance; }
 .table-wide { display: none; }
 .table-narrow { display: grid; gap: 0.5rem; }
@@ -163,6 +184,9 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
+.page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
+.page[lang="ur"] .source { font-size: 0.75rem; }
+.page[lang="ur"] .lat { line-height: 1.5; }
 .page[lang="ur"] .group-head { font-size: 1.45rem; }
 .page[lang="ur"] .sum-title { font-size: 1.05rem; }
 .page[lang="ur"] .context-note { font-size: 0.95rem; line-height: 2.2; }
@@ -201,13 +225,9 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
   </div>
   <nav data-aria="topicsLabel"><ol class="timeline" id="timeline"></ol></nav>
 
-  <section class="panel" id="panel-soon" hidden>
-    <div>
-      <h2 id="soon-title"></h2>
-      <p class="sub" id="soon-sub"></p>
-    </div>
-    <div class="soon" data-t="comingSoon"></div>
-  </section>
+  <section class="panel" id="panel-demonstratives" hidden><div><h2 id="demo-title"></h2><p class="sub" id="demo-sub"></p></div><div class="lesson" id="demo-body"></div></section>
+  <section class="panel" id="panel-pronouns" hidden><div><h2 id="pron-title"></h2><p class="sub" id="pron-sub"></p></div><div class="lesson" id="pron-body"></div></section>
+  <section class="panel" id="panel-gender" hidden><div><h2 id="gen-title"></h2><p class="sub" id="gen-sub"></p></div><div class="lesson" id="gen-body"></div></section>
 
   <section class="panel" id="panel-past-tense" hidden>
     <div>
@@ -358,9 +378,9 @@ const T = {
 };
 
 const topics = [
-  { id: 'demonstratives' },
-  { id: 'pronouns' },
-  { id: 'gender' },
+  { id: 'demonstratives', ready: true },
+  { id: 'pronouns', ready: true },
+  { id: 'gender', ready: true },
   { id: 'past-tense', ready: true }
 ];
 
@@ -448,7 +468,7 @@ const stopBody = $('stop-body');
 
 let lang = 'en';
 let verbIndex = 0;
-let topicId = 'past-tense';
+let topicId = 'demonstratives';
 try {
   const saved = localStorage.getItem('arabic-timeline-lang');
   if (saved === 'ur') lang = 'ur';
@@ -485,18 +505,13 @@ pickers.forEach(([el, prefix]) => verbs.forEach((v, i) => {
 }));
 
 function showTopic(id) {
-  const topic = topics.find(x => x.id === id) || topics[3];
+  const topic = topics.find(x => x.id === id) || topics[0];
   topicId = topic.id;
   topics.forEach(x => {
     const b = $('stop-' + x.id);
     if (x === topic) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+    $('panel-' + x.id).hidden = x !== topic;
   });
-  $('panel-past-tense').hidden = !topic.ready;
-  $('panel-soon').hidden = !!topic.ready;
-  if (!topic.ready) {
-    $('soon-title').textContent = t().topics[topic.id][0];
-    $('soon-sub').textContent = t().topics[topic.id][1];
-  }
 }
 
 function rowLabel(x) {
@@ -555,12 +570,147 @@ function alifHtml() {
   return alifVerbs.map(({ v, forms }) => `<div class="alif-verb"><div class="alif-name">${v[lang]}</div><div class="alif-forms">${forms.map((f, n) => `<div class="alif-form"><span class="cell-label">${L.persons[n][0]}</span><span class="mini" lang="ar">${f[0]}</span><span class="translit">${lat(f[1])}<br>${meaning(v, whos[n])}${whos[n].g || ''}</span></div>`).join('')}</div></div>`).join('');
 }
 
+const W = (a, t, en, ur) => ({ a, t, en, ur });
+const LS = {
+  en: {
+    source: 'Source: Speak Arabic in 40 Days, Al-Burhan Academy.',
+    demoSub: 'Which word to use, and when.',
+    demoIntro: 'Arabic picks the word based on three things: how near it is, whether it is male or female, and whether you mean people or things.',
+    tableWord: 'What you mean', near: 'Near', far: 'Far', notCovered: 'Not in this lecture',
+    rows: ['One male person or thing', 'One female person or thing', 'Many things (non-living)', 'Many people'],
+    thoseNote: 'This lecture teaches this, these, and that. It doesn\'t cover those yet.',
+    thisT: 'This: هَذَا and هَذِي', thisS: 'One person or thing near you',
+    thisP: `Use ${ar('هَذَا')} for one male person or thing. Use ${ar('هَذِي')} for one female person or thing. Things have a gender too: a book is male, and a car is female.`,
+    theseT: 'These: هَذِي and هَذُول', theseS: 'Many things or many people near you',
+    theseP: `Use ${ar('هَذِي')} for many non-living things, like books or cars. It is the same word as the female "this". Use ${ar('هَذُول')} for many people, including a mixed group.`,
+    thatT: 'That: ذَاك and ذِيك', thatS: 'One person or thing far from you',
+    thatP: `Use ${ar('ذَاك')} for one male person or thing far from you. Use ${ar('ذِيك')} for one female person or thing far from you.`,
+    askT: 'Asking who or what', askS: 'مَنْ for people and إِيش for things',
+    askP: `Use ${ar('مَنْ')} (who) for people. Use ${ar('إِيش')} (what) for things.`,
+    pronSub: 'Open a pronoun to see three examples.',
+    pronGroup1: 'Pronouns for people', pronGroup2: 'Endings for belonging',
+    pronEndNote: 'These endings join directly to the noun.',
+    reading: 'Reading', readingSub: 'All the pronouns together',
+    readingMore: 'Pronunciation and meaning',
+    genSub: 'How to tell male and female words apart.',
+    genH: 'How to identify each',
+    genList: [`Look at the end. Many female words end in ${ar('ة')}.`, `Remove ${ar('ة')}. This usually gives you the male form.`, `Try "this". A male word takes ${ar('هَذَا')}, and a female word takes ${ar('هَذِي')}.`, `Not every female word has ${ar('ة')}. For example, ${ar('مَرْيَم')} is a female name.`, `Watch the vowels. ${ar('مُدَرِّسَة')} is a female teacher, and ${ar('مَدْرَسَة')} is a school.`],
+    male: 'Male', female: 'Female', maleMixed: 'Male or mixed',
+    tPeople: 'People', tPeopleS: 'Add ة to make the female form',
+    tGroups: 'Groups of people', tGroupsS: 'A dash means the form is not in this lecture',
+    tNames: 'Names', tNamesS: 'Names from the lecture',
+    tThings: 'Things', tThingsS: 'Male and female objects from the lecture'
+  },
+  ur: {
+    source: 'ماخذ: Speak Arabic in 40 Days، البرہان اکیڈمی۔',
+    demoSub: 'کون سا لفظ کب استعمال کریں۔',
+    demoIntro: 'عربی میں لفظ تین باتوں سے چنا جاتا ہے: چیز کتنی قریب ہے، مذکر ہے یا مؤنث، اور بات لوگوں کی ہے یا چیزوں کی۔',
+    tableWord: 'آپ کا مطلب', near: 'قریب', far: 'دور', notCovered: 'اس لیکچر میں نہیں',
+    rows: ['ایک مذکر شخص یا چیز', 'ایک مؤنث شخص یا چیز', 'کئی چیزیں (بے جان)', 'کئی لوگ'],
+    thoseNote: 'یہ لیکچر this، these اور that سکھاتا ہے۔ those ابھی اس میں شامل نہیں۔',
+    thisT: 'یہ (ایک): هَذَا اور هَذِي', thisS: 'قریب کا ایک شخص یا چیز',
+    thisP: `ایک مذکر شخص یا چیز کے لیے ${ar('هَذَا')} استعمال کریں۔ ایک مؤنث شخص یا چیز کے لیے ${ar('هَذِي')} استعمال کریں۔ چیزوں کی بھی جنس ہوتی ہے: کتاب مذکر ہے اور گاڑی مؤنث۔`,
+    theseT: 'یہ (کئی): هَذِي اور هَذُول', theseS: 'قریب کی کئی چیزیں یا کئی لوگ',
+    theseP: `کئی بے جان چیزوں، جیسے کتابوں یا گاڑیوں، کے لیے ${ar('هَذِي')} استعمال کریں۔ یہ وہی لفظ ہے جو ایک مؤنث کے لیے آتا ہے۔ کئی لوگوں کے لیے، ملے جلے گروہ سمیت، ${ar('هَذُول')} استعمال کریں۔`,
+    thatT: 'وہ: ذَاك اور ذِيك', thatS: 'دور کا ایک شخص یا چیز',
+    thatP: `دور کے ایک مذکر شخص یا چیز کے لیے ${ar('ذَاك')} استعمال کریں۔ دور کے ایک مؤنث شخص یا چیز کے لیے ${ar('ذِيك')} استعمال کریں۔`,
+    askT: 'کون اور کیا پوچھنا', askS: 'لوگوں کے لیے مَنْ اور چیزوں کے لیے إِيش',
+    askP: `لوگوں کے لیے ${ar('مَنْ')} (کون) استعمال کریں۔ چیزوں کے لیے ${ar('إِيش')} (کیا) استعمال کریں۔`,
+    pronSub: 'تین مثالیں دیکھنے کے لیے کوئی ضمیر کھولیں۔',
+    pronGroup1: 'لوگوں کے لیے ضمیریں', pronGroup2: 'ملکیت کے آخری حصے',
+    pronEndNote: 'یہ آخری حصے سیدھے اسم کے ساتھ جڑتے ہیں۔',
+    reading: 'پڑھائی', readingSub: 'تمام ضمیریں ایک ساتھ',
+    readingMore: 'تلفظ اور مطلب',
+    genSub: 'مذکر اور مؤنث الفاظ کو پہچاننے کا طریقہ۔',
+    genH: 'پہچاننے کا طریقہ',
+    genList: [`آخر دیکھیں۔ بہت سے مؤنث الفاظ ${ar('ة')} پر ختم ہوتے ہیں۔`, `${ar('ة')} ہٹا دیں۔ عام طور پر مذکر شکل مل جاتی ہے۔`, `«یہ» لگا کر دیکھیں۔ مذکر لفظ کے ساتھ ${ar('هَذَا')} اور مؤنث لفظ کے ساتھ ${ar('هَذِي')} آتا ہے۔`, `ہر مؤنث لفظ میں ${ar('ة')} نہیں ہوتی۔ مثلاً ${ar('مَرْيَم')} مؤنث نام ہے۔`, `حرکتوں کا خیال رکھیں۔ ${ar('مُدَرِّسَة')} استانی ہے اور ${ar('مَدْرَسَة')} اسکول۔`],
+    male: 'مذکر', female: 'مؤنث', maleMixed: 'مذکر یا ملا جلا',
+    tPeople: 'لوگ', tPeopleS: 'مؤنث بنانے کے لیے ة لگائیں',
+    tGroups: 'لوگوں کے گروہ', tGroupsS: 'لکیر کا مطلب ہے کہ یہ شکل اس لیکچر میں نہیں',
+    tNames: 'نام', tNamesS: 'لیکچر کے نام',
+    tThings: 'چیزیں', tThingsS: 'لیکچر کی مذکر اور مؤنث چیزیں'
+  }
+};
+const DEMO = {
+  matrix: [['هَذَا', 'ذَاك'], ['هَذِي', 'ذِيك'], ['هَذِي', null], ['هَذُول', null]],
+  this: [W('هَذَا كِتَاب', 'haadha kitaab', 'This is a book', 'یہ کتاب ہے'), W('هَذَا قَلَم', 'haadha qalam', 'This is a pen', 'یہ قلم ہے'), W('هَذَا مَسْجِد', 'haadha masjid', 'This is a mosque', 'یہ مسجد ہے'), W('هَذَا أَحْمَد', 'haadha ahmad', 'This is Ahmad', 'یہ احمد ہے'), W('هَذِي سَيَّارَة', 'haadhi sayyaarah', 'This is a car', 'یہ گاڑی ہے'), W('هَذِي شَنْطَة', 'haadhi shantah', 'This is a bag', 'یہ بیگ ہے'), W('هَذِي مَدْرَسَة', 'haadhi madrasah', 'This is a school', 'یہ اسکول ہے'), W('هَذِي فَاطِمَة', 'haadhi faatimah', 'This is Fatimah', 'یہ فاطمہ ہے')],
+  these: [W('هَذِي كُتُب', 'haadhi kutub', 'These are books', 'یہ کتابیں ہیں'), W('هَذِي أَقْلَام', 'haadhi aqlaam', 'These are pens', 'یہ قلم ہیں'), W('هَذِي سَيَّارَات', 'haadhi sayyaaraat', 'These are cars', 'یہ گاڑیاں ہیں'), W('هَذِي مَدَارِس', 'haadhi madaaris', 'These are schools', 'یہ اسکول ہیں'), W('هَذُول طُلَّاب', 'haadhool tullaab', 'These are students', 'یہ طلبہ ہیں'), W('هَذُول مُدَرِّسِين', 'haadhool mudarrisiin', 'These are teachers', 'یہ اساتذہ ہیں'), W('هَذُول أَطِبَّاء', "haadhool atibbaa'", 'These are doctors', 'یہ ڈاکٹر ہیں'), W('هَذُول أَصْدِقَاء', "haadhool asdiqaa'", 'These are friends', 'یہ دوست ہیں')],
+  that: [W('ذَاك كِتَاب', 'dhaak kitaab', 'That is a book', 'وہ کتاب ہے'), W('ذَاك قَلَم', 'dhaak qalam', 'That is a pen', 'وہ قلم ہے'), W('ذَاك أَحْمَد', 'dhaak ahmad', 'That is Ahmad', 'وہ احمد ہے'), W('ذِيك سَيَّارَة', 'dheek sayyaarah', 'That is a car', 'وہ گاڑی ہے'), W('ذِيك شَنْطَة', 'dheek shantah', 'That is a bag', 'وہ بیگ ہے'), W('ذِيك فَاطِمَة', 'dheek faatimah', 'That is Fatimah', 'وہ فاطمہ ہے')],
+  ask: [W('مَنْ هَذَا؟ هَذَا خَالِد.', 'man haadha? haadha khaalid.', 'Who is this? This is Khalid.', 'یہ کون ہے؟ یہ خالد ہے۔'), W('مَنْ هَذِي؟ هَذِي مَرْيَم.', 'man haadhi? haadhi maryam.', 'Who is this? This is Maryam.', 'یہ کون ہے؟ یہ مریم ہے۔'), W('إِيش هَذَا؟ هَذَا دَفْتَر.', 'eesh haadha? haadha daftar.', 'What is this? This is a notebook.', 'یہ کیا ہے؟ یہ کاپی ہے۔'), W('إِيش هَذِي؟ هَذِي كُتُب.', 'eesh haadhi? haadhi kutub.', 'What are these? These are books.', 'یہ کیا ہیں؟ یہ کتابیں ہیں۔'), W('مَنْ هَذُول؟ هَذُول طُلَّاب.', 'man haadhool? haadhool tullaab.', 'Who are these? These are students.', 'یہ کون ہیں؟ یہ طلبہ ہیں۔')]
+};
+const PRON = {
+  people: [
+    { a: 'أَنَا', en: 'I', ur: 'میں', ex: [W('أَنَا مُدَرِّس', 'ana mudarris', 'I am a teacher', 'میں استاد ہوں'), W('أَنَا طَالِب', 'ana taalib', 'I am a student', 'میں طالب علم ہوں'), W('أَنَا دُكْتُور', 'ana duktoor', 'I am a doctor', 'میں ڈاکٹر ہوں')] },
+    { a: 'حِنَّا', en: 'we', ur: 'ہم', sub: { en: 'Used in everyday Saudi Arabic instead of نَحْنُ', ur: 'روزمرہ سعودی عربی میں نَحْنُ کی جگہ' }, ex: [W('حِنَّا طُلَّاب', 'hinna tullaab', 'We are students', 'ہم طلبہ ہیں'), W('حِنَّا مُدَرِّسِين', 'hinna mudarrisiin', 'We are teachers', 'ہم اساتذہ ہیں'), W('حِنَّا أَصْدِقَاء', "hinna asdiqaa'", 'We are friends', 'ہم دوست ہیں')] },
+    { a: 'أَنْتَ', en: 'you (one male)', ur: 'تم (ایک مذکر)', ex: [W('أَنْتَ مُدَرِّس', 'anta mudarris', 'You are a teacher', 'تم استاد ہو'), W('أَنْتَ طَالِب', 'anta taalib', 'You are a student', 'تم طالب علم ہو'), W('أَنْتَ دُكْتُور', 'anta duktoor', 'You are a doctor', 'تم ڈاکٹر ہو')] },
+    { a: 'أَنْتِ', en: 'you (one female)', ur: 'تم (ایک مؤنث)', ex: [W('أَنْتِ مُدَرِّسَة', 'anti mudarrisah', 'You are a teacher', 'تم استانی ہو'), W('أَنْتِ طَالِبَة', 'anti taalibah', 'You are a student', 'تم طالبہ ہو'), W('أَنْتِ دُكْتُورَة', 'anti duktoorah', 'You are a doctor', 'تم ڈاکٹر ہو')] },
+    { a: 'أَنْتُمْ', en: 'you (more than one)', ur: 'تم سب', ex: [W('أَنْتُمْ طُلَّاب', 'antum tullaab', 'You are students', 'تم سب طلبہ ہو'), W('أَنْتُمْ مُدَرِّسِين', 'antum mudarrisiin', 'You are teachers', 'تم سب اساتذہ ہو'), W('أَنْتُمْ أَصْدِقَاء', "antum asdiqaa'", 'You are friends', 'تم سب دوست ہو')] },
+    { a: 'هُوَ', en: 'he', ur: 'وہ (مذکر)', ex: [W('هُوَ مُدَرِّس', 'huwa mudarris', 'He is a teacher', 'وہ استاد ہے'), W('هُوَ طَالِب', 'huwa taalib', 'He is a student', 'وہ طالب علم ہے'), W('هُوَ أَحْمَد', 'huwa ahmad', 'He is Ahmad', 'وہ احمد ہے')] },
+    { a: 'هِيَ', en: 'she', ur: 'وہ (مؤنث)', ex: [W('هِيَ مُدَرِّسَة', 'hiya mudarrisah', 'She is a teacher', 'وہ استانی ہے'), W('هِيَ طَالِبَة', 'hiya taalibah', 'She is a student', 'وہ طالبہ ہے'), W('هِيَ فَاطِمَة', 'hiya faatimah', 'She is Fatimah', 'وہ فاطمہ ہے')] },
+    { a: 'هُمْ', en: 'they', ur: 'وہ (جمع)', ex: [W('هُمْ طُلَّاب', 'hum tullaab', 'They are students', 'وہ طلبہ ہیں'), W('هُمْ مُدَرِّسِين', 'hum mudarrisiin', 'They are teachers', 'وہ اساتذہ ہیں'), W('هُمْ أَصْدِقَاء', "hum asdiqaa'", 'They are friends', 'وہ دوست ہیں')] }
+  ],
+  endings: [
+    { a: 'ـي', en: 'my', ur: 'میرا، میری', ex: [W('كِتَابِي', 'kitaabi', 'my book', 'میری کتاب'), W('بَيْتِي', 'bayti', 'my house', 'میرا گھر'), W('سَيَّارَتِي', 'sayyaarati', 'my car', 'میری گاڑی')] },
+    { a: 'ـنَا', en: 'our', ur: 'ہمارا، ہماری', ex: [W('كِتَابْنَا', 'kitaabna', 'our book', 'ہماری کتاب'), W('بَيْتْنَا', 'baytna', 'our house', 'ہمارا گھر'), W('سَيَّارَتْنَا', 'sayyaaratna', 'our car', 'ہماری گاڑی')] },
+    { a: 'ـه', en: 'his', ur: 'اس کا، اس کی (مذکر)', ex: [W('مِفْتَاحَه', 'miftaahah', 'his key', 'اس کی چابی'), W('غُرْفَتَه', 'ghurfatah', 'his room', 'اس کا کمرہ'), W('سَاعَتَه', "saa'atah", 'his watch', 'اس کی گھڑی')] },
+    { a: 'ـهَا', en: 'her', ur: 'اس کا، اس کی (مؤنث)', ex: [W('مِفْتَاحْهَا', 'miftaahha', 'her key', 'اس کی چابی'), W('غُرْفَتْهَا', 'ghurfatha', 'her room', 'اس کا کمرہ'), W('سَاعَتْهَا', "saa'atha", 'her watch', 'اس کی گھڑی')] },
+    { a: 'ـهُم', en: 'their', ur: 'ان کا، ان کی', ex: [W('مِفْتَاحْهُم', 'miftaahhum', 'their key', 'ان کی چابی'), W('غُرْفَتْهُم', 'ghurfathum', 'their room', 'ان کا کمرہ'), W('سَاعَتْهُم', "saa'athum", 'their watch', 'ان کی گھڑی')] }
+  ],
+  reading: {
+    a: 'أَنَا طَالِب، وَأَنْتَ مُدَرِّس. أَنْتِ دُكْتُورَة، وَأَنْتُمْ أَصْدِقَاء. هُوَ مُهَنْدِس، وَهِيَ مُدَرِّسَة. هُمْ طُلَّاب، وَحِنَّا طُلَّاب. هَذَا كِتَابِي، وَهَذَا كِتَابْنَا. هَذَا مِفْتَاحَه، وَهَذَا مِفْتَاحْهَا، وَهَذَا مِفْتَاحْهُم.',
+    t: "Ana taalib, wa anta mudarris. Anti duktoorah, wa antum asdiqaa'. Huwa muhandis, wa hiya mudarrisah. Hum tullaab, wa hinna tullaab. Haadha kitaabi, wa haadha kitaabna. Haadha miftaahah, wa haadha miftaahha, wa haadha miftaahhum.",
+    en: 'I am a student, and you are a teacher. You are a doctor, and you all are friends. He is an engineer, and she is a teacher. They are students, and we are students. This is my book, and this is our book. This is his key, this is her key, and this is their key.',
+    ur: 'میں طالب علم ہوں، اور تم استاد ہو۔ تم ڈاکٹر ہو، اور تم سب دوست ہو۔ وہ انجینئر ہے، اور وہ استانی ہے۔ وہ طلبہ ہیں، اور ہم طلبہ ہیں۔ یہ میری کتاب ہے، اور یہ ہماری کتاب ہے۔ یہ اس (مذکر) کی چابی ہے، یہ اس (مؤنث) کی چابی ہے، اور یہ ان کی چابی ہے۔'
+  }
+};
+const GEN = {
+  people: [[W('طَالِب', 'taalib', 'student', 'طالب علم'), W('طَالِبَة', 'taalibah', 'student', 'طالبہ')], [W('مُدَرِّس', 'mudarris', 'teacher', 'استاد'), W('مُدَرِّسَة', 'mudarrisah', 'teacher', 'استانی')], [W('مُهَنْدِس', 'muhandis', 'engineer', 'انجینئر'), W('مُهَنْدِسَة', 'muhandisah', 'engineer', 'انجینئر')], [W('دُكْتُور', 'duktoor', 'doctor', 'ڈاکٹر'), W('دُكْتُورَة', 'duktoorah', 'doctor', 'ڈاکٹر')], [W('مُوَظَّف', 'muwazzaf', 'employee', 'ملازم'), W('مُوَظَّفَة', 'muwazzafah', 'employee', 'ملازمہ')]],
+  groups: [[W('طُلَّاب', 'tullaab', 'students', 'طلبہ'), W('طَالِبَات', 'taalibaat', 'students', 'طالبات')], [W('مُهَنْدِسِين', 'muhandisiin', 'engineers', 'انجینئر'), W('مُهَنْدِسَات', 'muhandisaat', 'engineers', 'انجینئر')], [W('أَصْدِقَاء', "asdiqaa'", 'friends', 'دوست'), W('صَدِيقَات', 'sadeeqaat', 'friends', 'سہیلیاں')], [W('مُدَرِّسِين', 'mudarrisiin', 'teachers', 'اساتذہ'), null], [W('دَكَاتِرَة', 'dakaatirah', 'doctors', 'ڈاکٹر'), null]],
+  names: [[W('أَحْمَد', 'ahmad', 'Ahmad', 'احمد'), W('فَاطِمَة', 'faatimah', 'Fatimah', 'فاطمہ')], [W('خَالِد', 'khaalid', 'Khalid', 'خالد'), W('مَرْيَم', 'maryam', 'Maryam', 'مریم')]],
+  things: [[W('كِتَاب', 'kitaab', 'book', 'کتاب'), W('سَيَّارَة', 'sayyaarah', 'car', 'گاڑی')], [W('قَلَم', 'qalam', 'pen', 'قلم'), W('شَنْطَة', 'shantah', 'bag', 'بیگ')], [W('جَوَّال', 'jawwaal', 'phone', 'فون'), W('حَقِيبَة', 'haqeebah', 'bag', 'بیگ')], [W('مَسْجِد', 'masjid', 'mosque', 'مسجد'), W('مَدْرَسَة', 'madrasah', 'school', 'اسکول')], [W('دَفْتَر', 'daftar', 'notebook', 'کاپی'), W('غُرْفَة', 'ghurfah', 'room', 'کمرہ')], [W('كُرْسِي', 'kursi', 'chair', 'کرسی'), W('حَدِيقَة', 'hadeeqah', 'garden', 'باغ')], [W('مَكْتَب', 'maktab', 'desk', 'میز'), W('مِرْوَحَة', 'mirwahah', 'fan', 'پنکھا')], [W('بَاب', 'baab', 'door', 'دروازہ'), W('صُورَة', 'soorah', 'picture', 'تصویر')], [W('بَيْت', 'bayt', 'house', 'گھر'), W('نَظَّارَة', 'nazzaarah', 'glasses', 'عینک')], [W('مِفْتَاح', 'miftaah', 'key', 'چابی'), W('سَاعَة', "saa'ah", 'watch', 'گھڑی')], [W('لَابْتُوب', 'laabtoob', 'laptop', 'لیپ ٹاپ'), null]]
+};
+const gloss = x => (lang === 'ur' ? x.ur : x.en);
+const wordHtml = x => x ? `<span class="mini" lang="ar">${x.a}</span><span class="translit">${lat(x.t)} · ${gloss(x)}</span>` : '<span class="dash">—</span>';
+const exList = list => `<ul class="ex-list">${list.map(x => `<li>${wordHtml(x)}</li>`).join('')}</ul>`;
+const foldHtml = (id, title, sub, body, open) => `<details id="${id}"${open ? ' open' : ''}><summary><span class="sum-title">${title}</span><span class="sum-sub">${sub}</span></summary><div class="fold">${body}</div></details>`;
+const twoCol = (rows, left, right) => `<div class="stop-wrap"><table class="word-table"><thead><tr><th scope="col">${left}</th><th scope="col">${right}</th></tr></thead><tbody>${rows.map(r => `<tr><td>${wordHtml(r[0])}</td><td>${wordHtml(r[1])}</td></tr>`).join('')}</tbody></table></div>`;
+function renderLessons() {
+  const S = LS[lang];
+  $('demo-body').innerHTML = `<p class="lesson-text">${S.demoIntro}</p>
+    <div class="stop-wrap"><table class="word-table three"><thead><tr><th scope="col">${S.tableWord}</th><th scope="col">${S.near}</th><th scope="col">${S.far}</th></tr></thead><tbody>${DEMO.matrix.map((r, i) => `<tr><td>${S.rows[i]}</td><td><span class="mini" lang="ar">${r[0]}</span></td><td>${r[1] ? `<span class="mini" lang="ar">${r[1]}</span>` : `<span class="dash">${S.notCovered}</span>`}</td></tr>`).join('')}</tbody></table></div>
+    <p class="note">${S.thoseNote}</p>
+    ${foldHtml('demo-this', S.thisT, S.thisS, `<p class="note">${S.thisP}</p>${exList(DEMO.this)}`, true)}
+    ${foldHtml('demo-these', S.theseT, S.theseS, `<p class="note">${S.theseP}</p>${exList(DEMO.these)}`, false)}
+    ${foldHtml('demo-that', S.thatT, S.thatS, `<p class="note">${S.thatP}</p>${exList(DEMO.that)}`, false)}
+    ${foldHtml('demo-ask', S.askT, S.askS, `<p class="note">${S.askP}</p>${exList(DEMO.ask)}`, false)}
+    <p class="source">${S.source}</p>`;
+  const pronFold = (p, id) => foldHtml(id, `<span class="sum-ar" lang="ar">${p.a}</span> <span>${gloss(p)}</span>`, p.sub ? p.sub[lang] : (lang === 'ur' ? 'تین مثالیں' : '3 examples'), exList(p.ex), false);
+  $('pron-body').innerHTML = `<h3 class="sec-head">${S.pronGroup1}</h3><div class="fold-list">${PRON.people.map((p, i) => pronFold(p, 'pron-p' + i)).join('')}</div>
+    <h3 class="sec-head">${S.pronGroup2}</h3><p class="note">${S.pronEndNote}</p><div class="fold-list">${PRON.endings.map((p, i) => pronFold(p, 'pron-e' + i)).join('')}</div>
+    <section class="reading"><h3 class="sec-head">${S.reading}</h3><p class="note">${S.readingSub}</p><p class="reading-ar" lang="ar" dir="rtl">${PRON.reading.a}</p>
+    ${foldHtml('pron-reading', S.readingMore, '', `<p class="note" dir="ltr" lang="en" style="font-family:var(--latin)">${PRON.reading.t}</p><p class="note">${gloss(PRON.reading)}</p>`, false)}</section>
+    <p class="source">${S.source}</p>`;
+  $('gen-body').innerHTML = `<h3 class="sec-head">${S.genH}</h3><ul class="gen-list">${S.genList.map(x => `<li>${x}</li>`).join('')}</ul>
+    ${foldHtml('gen-people', S.tPeople, S.tPeopleS, twoCol(GEN.people, S.male, S.female), true)}
+    ${foldHtml('gen-groups', S.tGroups, S.tGroupsS, twoCol(GEN.groups, S.maleMixed, S.female), false)}
+    ${foldHtml('gen-names', S.tNames, S.tNamesS, twoCol(GEN.names, S.male, S.female), false)}
+    ${foldHtml('gen-things', S.tThings, S.tThingsS, twoCol(GEN.things, S.male, S.female), false)}
+    <p class="source">${S.source}</p>`;
+  $('demo-sub').textContent = S.demoSub;
+  $('pron-sub').textContent = S.pronSub;
+  $('gen-sub').textContent = S.genSub;
+  $('demo-title').textContent = t().topics.demonstratives[0];
+  $('pron-title').textContent = t().topics.pronouns[0];
+  $('gen-title').textContent = t().topics.gender[0];
+}
+
 function applyLanguage() {
   const L = t();
   $('alif-verbs').innerHTML = alifHtml();
   const page = $('page');
   page.lang = lang;
   page.dir = lang === 'ur' ? 'rtl' : 'ltr';
+  renderLessons();
   document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = L[el.dataset.t]; });
   document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', L[el.dataset.aria]));
   pickers.forEach(([el]) => el.setAttribute('aria-label', L.pickVerb));
@@ -583,7 +733,7 @@ function setLanguage(next) {
 $('lang-en').addEventListener('click', () => setLanguage('en'));
 $('lang-ur').addEventListener('click', () => setLanguage('ur'));
 
-topicId = location.hash.slice(1) || 'past-tense';
+topicId = location.hash.slice(1) || 'demonstratives';
 applyLanguage();
 window.addEventListener('hashchange', () => showTopic(location.hash.slice(1)));
 </script>
