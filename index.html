@@ -217,7 +217,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
     <div class="picker" id="picker" role="group"></div>
     <div class="table-wide" id="table-wide"></div>
     <div class="table-narrow" id="table-narrow"></div>
-    <p class="note" id="note" hidden></p>
+    <p class="note" data-t="verbPrompt"></p>
 
     <div class="context-head">
       <h3 class="group-head" data-t="contextHead"></h3>
@@ -271,6 +271,7 @@ const T = {
     pickVerb: 'Choose a verb',
     contextHead: "Teacher's remarks",
     contextNote: '(all points made in class)',
+    verbPrompt: 'Select the verbs and see how they sound and change in first, second, and third person reference.',
     contextSub: 'Pick a verb to update the examples below.',
     sukoonTitle: 'When a vowel becomes sukoon',
     sukoonSub: 'How endings sound when you stop after a word',
@@ -317,6 +318,7 @@ const T = {
     pickVerb: 'فعل چنیں',
     contextHead: 'استاد کے نکات',
     contextNote: '(کلاس میں بتائے گئے تمام نکات)',
+    verbPrompt: 'فعل چنیں اور دیکھیں کہ وہ پہلے، دوسرے اور تیسرے شخص میں کیسے سنائی دیتے اور بدلتے ہیں۔',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
     sukoonTitle: 'جب حرکت سکون میں بدل جائے',
     sukoonSub: 'لفظ پر رکنے سے آخری آواز کیسے بدلتی ہے',
@@ -442,7 +444,6 @@ const $ = id => document.getElementById(id);
 const pickers = [[$('picker'), 'verb-'], [$('picker-context'), 'context-verb-']];
 const wide = $('table-wide');
 const narrow = $('table-narrow');
-const note = $('note');
 const stopBody = $('stop-body');
 
 let lang = 'en';
@@ -527,8 +528,6 @@ function draw() {
     $('person-sub-' + n).textContent = L.persons[n][1];
     $('person-body-' + n).innerHTML = p.cells.map(x => cellHtml(x, v, p.c, true)).join('');
   });
-  note.innerHTML = v.note ? v.note[lang] : '';
-  note.hidden = !v.note;
 
   stopBody.innerHTML = stops.map(r => {
     const st = stem(v, r);
