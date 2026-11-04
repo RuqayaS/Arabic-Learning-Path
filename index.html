@@ -59,8 +59,8 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .lang button[aria-pressed="true"] { background: var(--accent-bg); color: var(--accent); font-weight: 700; }
 .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
-.timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); position: relative; }
-.timeline::before { content: ""; position: absolute; top: 1.25rem; left: 12.5%; right: 12.5%; height: 2px; background: var(--line); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); position: relative; }
+.timeline::before { content: ""; position: absolute; top: 1.25rem; left: 10%; right: 10%; height: 2px; background: var(--line); }
 .timeline li { min-width: 0; position: relative; }
 .stop { width: 100%; height: 100%; font: inherit; color: var(--ink); background: none; border: 0; border-radius: 6px; padding: 0.25rem 0.25rem 0.5rem; cursor: pointer; display: grid; justify-items: center; align-content: start; gap: 0.3rem; text-align: center; }
 .stop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -68,7 +68,7 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .stop.ready .dot { border: 2px solid var(--accent); color: var(--accent); }
 .stop[aria-current="true"] .dot { background: var(--accent); border: 2px solid var(--accent); color: var(--on-accent); }
 .stop:hover .dot { border-color: var(--accent); }
-.stop-name { font-size: 0.9rem; font-weight: 500; line-height: 1.25; }
+.stop-name { font-size: 0.82rem; font-weight: 500; line-height: 1.25; }
 .stop[aria-current="true"] .stop-name { font-weight: 700; color: var(--accent); }
 .stop-state { font-size: 0.75rem; color: var(--soft); line-height: 1.2; }
 
@@ -226,6 +226,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
   <nav data-aria="topicsLabel"><ol class="timeline" id="timeline"></ol></nav>
 
   <section class="panel" id="panel-demonstratives" hidden><div><h2 id="demo-title"></h2><p class="sub" id="demo-sub"></p></div><div class="lesson" id="demo-body"></div></section>
+  <section class="panel" id="panel-questions" hidden><div><h2 id="q-title"></h2><p class="sub" id="q-sub"></p></div><div class="lesson" id="q-body"></div></section>
   <section class="panel" id="panel-pronouns" hidden><div><h2 id="pron-title"></h2><p class="sub" id="pron-sub"></p></div><div class="lesson" id="pron-body"></div></section>
   <section class="panel" id="panel-gender" hidden><div><h2 id="gen-title"></h2><p class="sub" id="gen-sub"></p></div><div class="lesson" id="gen-body"></div></section>
 
@@ -321,6 +322,7 @@ const T = {
     persons: [['First person', 'I, we'], ['Second person', 'you'], ['Third person', 'he, she, they']],
     topics: {
       demonstratives: ['This, that, these, those', 'Words for pointing at people and things.'],
+      questions: ['Questions', ''],
       pronouns: ['Pronouns', 'He, she, it, they, we, our, her, him, theirs, and the rest.'],
       gender: ['Male and female words', 'How to tell male and female words apart.'],
       'past-tense': ['Past tense table', '']
@@ -368,6 +370,7 @@ const T = {
     persons: [['پہلا شخص', 'میں، ہم'], ['دوسرا شخص', 'تم'], ['تیسرا شخص', 'وہ']],
     topics: {
       demonstratives: ['یہ، وہ، یہ سب، وہ سب', 'لوگوں اور چیزوں کی طرف اشارہ کرنے والے الفاظ۔'],
+      questions: ['سوالات', ''],
       pronouns: ['ضمیریں', 'وہ، یہ، ہم، ہمارا، اس کا، انہیں، ان کا اور باقی ضمیریں۔'],
       gender: ['مذکر اور مؤنث الفاظ', 'مذکر اور مؤنث الفاظ کو پہچاننے کا طریقہ۔'],
       'past-tense': ['ماضی کا جدول', '']
@@ -379,6 +382,7 @@ const T = {
 
 const topics = [
   { id: 'demonstratives', ready: true },
+  { id: 'questions', ready: true },
   { id: 'pronouns', ready: true },
   { id: 'gender', ready: true },
   { id: 'past-tense', ready: true }
@@ -674,6 +678,29 @@ const wordHtml = x => x ? `<span class="mini" lang="ar">${x.a}</span><span class
 const exList = list => `<ul class="ex-list">${list.map(x => `<li>${wordHtml(x)}</li>`).join('')}</ul>`;
 const foldHtml = (id, title, sub, body, open) => `<details id="${id}"${open ? ' open' : ''}><summary><span class="sum-title">${title}</span><span class="sum-sub">${sub}</span></summary><div class="fold">${body}</div></details>`;
 const twoCol = (rows, left, right) => `<div class="stop-wrap"><table class="word-table"><thead><tr><th scope="col">${left}</th><th scope="col">${right}</th></tr></thead><tbody>${rows.map(r => `<tr><td>${wordHtml(r[0])}</td><td>${wordHtml(r[1])}</td></tr>`).join('')}</tbody></table></div>`;
+const QS = {
+  en: { sub: 'Six question words, with three examples each.', ex3: '3 examples', reading: 'Reading exercise', readingSub: 'All the examples together', more: 'Pronunciation and meaning', note: 'مَنْ and إِيش are from your lecture. The other four are common in everyday Saudi Arabic, but they are not in this lecture.' },
+  ur: { sub: 'سوال کے چھ الفاظ، ہر ایک کی تین مثالوں کے ساتھ۔', ex3: 'تین مثالیں', reading: 'پڑھنے کی مشق', readingSub: 'تمام مثالیں ایک ساتھ', more: 'تلفظ اور مطلب', note: 'مَنْ اور إِيش آپ کے لیکچر سے ہیں۔ باقی چار روزمرہ سعودی عربی میں عام ہیں، لیکن اس لیکچر میں نہیں۔' }
+};
+const QUESTIONS = [
+  { a: 'مَنْ', en: 'who', ur: 'کون', ex: [W('مَنْ هَذَا؟', 'man haadha?', 'Who is this?', 'یہ کون ہے؟'), W('مَنْ هِيَ؟', 'man hiya?', 'Who is she?', 'وہ کون ہے؟'), W('مَنْ أَنْتَ؟', 'man anta?', 'Who are you?', 'تم کون ہو؟')] },
+  { a: 'إِيش', en: 'what', ur: 'کیا', ex: [W('إِيش هَذَا؟', 'eesh haadha?', 'What is this?', 'یہ کیا ہے؟'), W('إِيش هَذِي؟', 'eesh haadhi?', 'What is this?', 'یہ کیا ہے؟'), W('إِيش ذَاك؟', 'eesh dhaak?', 'What is that?', 'وہ کیا ہے؟')] },
+  { a: 'لِيش', en: 'why', ur: 'کیوں', ex: [W('لِيش أَنْتَ هِنَا؟', 'leesh anta hina?', 'Why are you here?', 'تم یہاں کیوں ہو؟'), W('لِيش هِيَ فِي الْمَدْرَسَة؟', 'leesh hiya fi l-madrasah?', 'Why is she at school?', 'وہ اسکول میں کیوں ہے؟'), W('لِيش هُمْ فِي الْبَيْت؟', 'leesh hum fi l-bayt?', 'Why are they at home?', 'وہ گھر پر کیوں ہیں؟')] },
+  { a: 'وَيْن', en: 'where', ur: 'کہاں', ex: [W('وَيْن الْكِتَاب؟', 'wayn al-kitaab?', 'Where is the book?', 'کتاب کہاں ہے؟'), W('وَيْن السَّيَّارَة؟', 'wayn as-sayyaarah?', 'Where is the car?', 'گاڑی کہاں ہے؟'), W('وَيْن الْمَدْرَسَة؟', 'wayn al-madrasah?', 'Where is the school?', 'اسکول کہاں ہے؟')] },
+  { a: 'مَتَى', en: 'when', ur: 'کب', ex: [W('مَتَى الدَّرْس؟', 'mata ad-dars?', 'When is the lesson?', 'سبق کب ہے؟'), W('مَتَى الْمَوْعِد؟', "mata al-maw'id?", 'When is the appointment?', 'ملاقات کب ہے؟'), W('مَتَى الْعُطْلَة؟', "mata al-'utlah?", 'When is the holiday?', 'چھٹی کب ہے؟')] },
+  { a: 'كَيْف', en: 'how', ur: 'کیسے', ex: [W('كَيْف حَالَك؟', 'kayf haalak?', 'How are you? (to a male)', 'تم کیسے ہو؟'), W('كَيْف حَالِك؟', 'kayf haalik?', 'How are you? (to a female)', 'تم کیسی ہو؟'), W('كَيْف الْمَدْرَسَة؟', 'kayf al-madrasah?', 'How is the school?', 'اسکول کیسا ہے؟')] }
+];
+function renderQuestions() {
+  const Q = QS[lang];
+  const all = QUESTIONS.flatMap(q => q.ex);
+  $('q-title').textContent = t().topics.questions[0];
+  $('q-sub').textContent = Q.sub;
+  $('q-body').innerHTML = `<div class="fold-list">${QUESTIONS.map((q, i) => foldHtml('q-' + i, `<span class="sum-ar" lang="ar">${q.a}</span> <span>${gloss(q)}</span>`, Q.ex3, exList(q.ex), i === 0)).join('')}</div>
+    <section class="reading"><h3 class="sec-head">${Q.reading}</h3><p class="note">${Q.readingSub}</p><p class="reading-ar" lang="ar" dir="rtl">${all.map(x => x.a).join(' ')}</p>
+    ${foldHtml('q-reading', Q.more, '', `<p class="note" dir="ltr" lang="en" style="font-family:var(--latin)">${all.map(x => x.t).join(' ')}</p><p class="note">${all.map(gloss).join(' ')}</p>`, false)}</section>
+    <p class="note">${Q.note}</p>`;
+}
+
 function renderLessons() {
   const S = LS[lang];
   $('demo-body').innerHTML = `<p class="lesson-text">${S.demoIntro}</p>
@@ -711,6 +738,7 @@ function applyLanguage() {
   page.lang = lang;
   page.dir = lang === 'ur' ? 'rtl' : 'ltr';
   renderLessons();
+  renderQuestions();
   document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = L[el.dataset.t]; });
   document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', L[el.dataset.aria]));
   pickers.forEach(([el]) => el.setAttribute('aria-label', L.pickVerb));
