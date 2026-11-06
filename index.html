@@ -101,17 +101,6 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .callout h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
 .callout p { margin: 0; max-width: 65ch; }
 .callout .ex-list li { background: var(--surface); }
-.top-actions { display: inline-flex; align-items: center; gap: 0.5rem; }
-.intro-btn { font: inherit; font-size: 0.9rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0.3rem 0.8rem; cursor: pointer; }
-.intro-btn[aria-pressed="true"] { background: var(--accent-bg); border-color: var(--accent); color: var(--accent); font-weight: 700; }
-.intro-btn:focus-visible, .intro-topic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.intro-topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.5rem; }
-.intro-topic { width: 100%; height: 100%; font: inherit; color: var(--ink); text-align: start; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 0.7rem 0.85rem; cursor: pointer; display: flex; gap: 0.65rem; align-items: flex-start; }
-.intro-topic:hover { border-color: var(--accent); }
-.dot-small { flex: none; width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--accent); color: var(--accent); font-family: var(--latin); font-size: 0.8rem; font-weight: 700; line-height: 1; }
-.intro-name { display: block; font-weight: 700; }
-.intro-desc { display: block; font-size: 0.9rem; color: var(--soft); }
-.intro-src { display: block; margin-top: 0.25rem; font-size: 0.8rem; color: var(--accent); }
 .lesson-text { margin: 0; max-width: 65ch; }
 .sec-head { margin: 0.5rem 0 0; font-size: 1.15rem; font-weight: 700; }
 .source { margin: 0; font-size: 0.8rem; color: var(--soft); }
@@ -199,7 +188,6 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
-.page[lang="ur"] .intro-btn { line-height: 2; padding-block: 0; font-size: 0.85rem; }
 .page[lang="ur"] .callout h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
 .page[lang="ur"] .source { font-size: 0.75rem; }
@@ -235,14 +223,13 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 <main class="page" id="page" lang="en" dir="ltr">
   <div class="top">
     <h1 data-t="siteTitle">Arabic Learning Path</h1>
-    <div class="top-actions"><button type="button" class="intro-btn" id="go-intro"></button><div class="lang" role="group" aria-label="Language">
+    <div class="lang" role="group" aria-label="Language">
       <button type="button" id="lang-en" lang="en" dir="ltr" aria-pressed="true">English</button>
       <button type="button" id="lang-ur" lang="ur" dir="rtl" aria-pressed="false">اردو</button>
-    </div></div>
+    </div>
   </div>
   <nav data-aria="topicsLabel"><ol class="timeline" id="timeline"></ol></nav>
 
-  <section class="panel" id="panel-intro"><div class="lesson" id="intro-body"></div></section>
   <section class="panel" id="panel-demonstratives" hidden><div><h2 id="demo-title"></h2><p class="sub" id="demo-sub"></p></div><div class="lesson" id="demo-body"></div></section>
   <section class="panel" id="panel-questions" hidden><div><h2 id="q-title"></h2><p class="sub" id="q-sub"></p></div><div class="lesson" id="q-body"></div></section>
   <section class="panel" id="panel-pronouns" hidden><div><h2 id="pron-title"></h2><p class="sub" id="pron-sub"></p></div><div class="lesson" id="pron-body"></div></section>
@@ -490,7 +477,7 @@ const stopBody = $('stop-body');
 
 let lang = 'en';
 let verbIndex = 0;
-let topicId = 'intro';
+let topicId = 'demonstratives';
 try {
   const saved = localStorage.getItem('arabic-timeline-lang');
   if (saved === 'ur') lang = 'ur';
@@ -527,15 +514,13 @@ pickers.forEach(([el, prefix]) => verbs.forEach((v, i) => {
 }));
 
 function showTopic(id) {
-  const topic = topics.find(x => x.id === id);
-  topicId = topic ? topic.id : 'intro';
+  const topic = topics.find(x => x.id === id) || topics[0];
+  topicId = topic.id;
   topics.forEach(x => {
     const b = $('stop-' + x.id);
     if (x === topic) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
     $('panel-' + x.id).hidden = x !== topic;
   });
-  $('panel-intro').hidden = !!topic;
-  $('go-intro').setAttribute('aria-pressed', topic ? 'false' : 'true');
 }
 
 function rowLabel(x) {
@@ -756,28 +741,6 @@ function renderLessons() {
   $('gen-title').textContent = t().topics.gender[0];
 }
 
-const INTRO = {
-  en: { nav: 'Intro', h: 'About this website', p: ['This website brings together what is covered in our Arabic class: the lesson material, the teacher\'s remarks, and extra practice. It focuses on everyday Saudi Arabic and explains each point in simple English or Urdu.', 'Each topic has short explanations, tables, and examples with pronunciation. Longer parts sit inside dropdowns, so you can open only what you need.'], covered: 'What this website covers', topics: { demonstratives: ['Which word to use for near, far, male, female, people, and things, including why many non-living things are treated as female.', 'Lesson days 1 to 3'], questions: ['Who, what, why, where, when, and how, with examples and a reading exercise.', 'Lesson material and added practice'], pronouns: ['I, we, you, he, she, they, and the endings for my, our, his, her, and their, with a reading passage.', 'Lesson days 4, 5, 6, 9, and 10'], gender: ['How to identify male and female words, with tables for people, things, groups, and names.', 'Lesson day 8'], 'past-tense': ['How verbs change in first, second, and third person, with the teacher\'s remarks on sukoon, alif, and pronouns.', 'Class work'] }, how: 'How to use it', steps: ['Pick a topic on the timeline.', 'Read the short explanation, then open a dropdown for the details.', 'Read the Arabic aloud and check the pronunciation below it.', 'Use the buttons at the top to switch between English and Urdu.'], later: 'Not added yet: "those" and lesson day 7 (a and the).' },
-  ur: { nav: 'تعارف', h: 'اس ویب سائٹ کے بارے میں', p: ['یہ ویب سائٹ ہماری عربی کلاس کی پڑھائی کو ایک جگہ جمع کرتی ہے: سبق کا مواد، استاد کی باتیں اور اضافی مشق۔ اس کا مرکز روزمرہ سعودی عربی ہے، اور ہر نکتہ آسان انگریزی یا اردو میں سمجھایا گیا ہے۔', 'ہر موضوع میں مختصر وضاحت، جدول اور تلفظ کے ساتھ مثالیں ہیں۔ لمبے حصے ڈراپ ڈاؤن میں ہیں، تاکہ آپ صرف ضرورت کی چیز کھولیں۔'], covered: 'اس ویب سائٹ میں کیا ہے', topics: { demonstratives: ['قریب، دور، مذکر، مؤنث، لوگوں اور چیزوں کے لیے کون سا لفظ آئے، اور بہت سی بے جان چیزوں کو مؤنث کیوں مانا جاتا ہے۔', 'سبق کے دن 1 سے 3'], questions: ['کون، کیا، کیوں، کہاں، کب اور کیسے، مثالوں اور پڑھنے کی مشق کے ساتھ۔', 'سبق کا مواد اور اضافی مشق'], pronouns: ['میں، ہم، تم، وہ، اور میرا، ہمارا، اس کا، ان کا کے آخری حصے، پڑھنے کے ٹکڑے کے ساتھ۔', 'سبق کے دن 4، 5، 6، 9 اور 10'], gender: ['مذکر اور مؤنث الفاظ کی پہچان، اور لوگوں، چیزوں، گروہوں اور ناموں کے جدول۔', 'سبق کا دن 8'], 'past-tense': ['فعل پہلے، دوسرے اور تیسرے شخص میں کیسے بدلتے ہیں، اور سکون، الف اور ضمیر پر استاد کی باتیں۔', 'کلاس کا کام'] }, how: 'استعمال کا طریقہ', steps: ['ٹائم لائن سے کوئی موضوع چنیں۔', 'مختصر وضاحت پڑھیں، پھر تفصیل کے لیے ڈراپ ڈاؤن کھولیں۔', 'عربی بلند آواز سے پڑھیں اور نیچے تلفظ دیکھیں۔', 'اوپر کے بٹنوں سے انگریزی اور اردو بدلیں۔'], later: 'ابھی شامل نہیں: those اور سبق کا دن 7 (a اور the)۔' }
-};
-function renderIntro() {
-  const I = INTRO[lang];
-  $('go-intro').textContent = I.nav;
-  $('intro-body').innerHTML = `<div><h2>${I.h}</h2></div>${I.p.map(x => `<p class="lesson-text">${x}</p>`).join('')}
-    <h3 class="sec-head">${I.covered}</h3>
-    <ul class="intro-topics">${topics.map((x, n) => `<li><button type="button" class="intro-topic" data-topic="${x.id}"><span class="dot-small">${n + 1}</span><span><span class="intro-name">${t().topics[x.id][0]}</span><span class="intro-desc">${I.topics[x.id][0]}</span><span class="intro-src">${I.topics[x.id][1]}</span></span></button></li>`).join('')}</ul>
-    <h3 class="sec-head">${I.how}</h3>
-    <ol class="gen-list">${I.steps.map(x => `<li>${x}</li>`).join('')}</ol>
-    <p class="note">${I.later}</p>
-    <p class="source">${LS[lang].source}</p>`;
-  $('intro-body').querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => openTopic(b.dataset.topic)));
-}
-function openTopic(id) {
-  showTopic(id);
-  try { location.hash = id; } catch (e) {}
-  window.scrollTo(0, 0);
-}
-
 function applyLanguage() {
   const L = t();
   $('alif-verbs').innerHTML = alifHtml();
@@ -786,7 +749,6 @@ function applyLanguage() {
   page.dir = lang === 'ur' ? 'rtl' : 'ltr';
   renderLessons();
   renderQuestions();
-  renderIntro();
   document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = L[el.dataset.t]; });
   document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', L[el.dataset.aria]));
   pickers.forEach(([el]) => el.setAttribute('aria-label', L.pickVerb));
@@ -809,8 +771,7 @@ function setLanguage(next) {
 $('lang-en').addEventListener('click', () => setLanguage('en'));
 $('lang-ur').addEventListener('click', () => setLanguage('ur'));
 
-topicId = location.hash.slice(1) || 'intro';
-$('go-intro').addEventListener('click', () => openTopic('intro'));
+topicId = location.hash.slice(1) || 'demonstratives';
 applyLanguage();
 window.addEventListener('hashchange', () => showTopic(location.hash.slice(1)));
 </script>
