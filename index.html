@@ -514,7 +514,7 @@ topics.forEach((topic, n) => {
   $('timeline').appendChild(li);
 });
 
-narrow.innerHTML = persons.map((p, i) => `<details id="person-${i}"${i === 0 ? ' open' : ''}><summary><span class="sum-title" id="person-title-${i}"></span><span class="sum-sub" id="person-sub-${i}"></span></summary><div class="fold" id="person-body-${i}"></div></details>`).join('');
+narrow.innerHTML = persons.map((p, i) => `<details id="person-${i}"><summary><span class="sum-title" id="person-title-${i}"></span><span class="sum-sub" id="person-sub-${i}"></span></summary><div class="fold" id="person-body-${i}"></div></details>`).join('');
 
 pickers.forEach(([el, prefix]) => verbs.forEach((v, i) => {
   const b = document.createElement('button');
@@ -697,7 +697,7 @@ const GEN = {
 const gloss = x => (lang === 'ur' ? x.ur : x.en);
 const wordHtml = x => x ? `<span class="mini" lang="ar">${x.a}</span><span class="translit">${lat(x.t)} · ${gloss(x)}</span>` : '<span class="dash">—</span>';
 const exList = list => `<ul class="ex-list">${list.map(x => `<li>${wordHtml(x)}</li>`).join('')}</ul>`;
-const foldHtml = (id, title, sub, body, open) => `<details id="${id}"${open ? ' open' : ''}><summary><span class="sum-title">${title}</span><span class="sum-sub">${sub}</span></summary><div class="fold">${body}</div></details>`;
+const foldHtml = (id, title, sub, body, open) => `<details id="${id}"><summary><span class="sum-title">${title}</span><span class="sum-sub">${sub}</span></summary><div class="fold">${body}</div></details>`;
 const twoCol = (rows, left, right) => `<div class="stop-wrap"><table class="word-table"><thead><tr><th scope="col">${left}</th><th scope="col">${right}</th></tr></thead><tbody>${rows.map(r => `<tr><td>${wordHtml(r[0])}</td><td>${wordHtml(r[1])}</td></tr>`).join('')}</tbody></table></div>`;
 const QS = {
   en: { sub: 'Six question words, with three examples each.', ex3: '3 examples', reading: 'Reading exercise', readingSub: 'All the examples together', more: 'Pronunciation and meaning', note: 'مَنْ and إِيش are from your lecture. The other four are common in everyday Saudi Arabic, but they are not in this lecture.' },
