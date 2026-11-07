@@ -135,13 +135,10 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .meaning { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25rem 0.6rem; font-size: 0.9rem; color: var(--soft); }
 .meaning b { color: var(--ink); font-weight: 500; }
 .chip { font-family: var(--arabic); font-size: 1.05rem; line-height: 1.5; direction: rtl; color: var(--accent); background: var(--accent-bg); border-radius: 4px; padding: 0 0.45rem; white-space: nowrap; }
-.dial-note { display: grid; gap: 0.5rem; padding: 0.85rem; background: var(--accent-bg); border: 1px solid var(--accent); border-radius: 6px; min-width: 0; }
-.dial-note h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
-.dial-note p { margin: 0; max-width: 65ch; }
-.dial-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
-.dial-rows li { display: grid; gap: 0.1rem; padding: 0.45rem 0.7rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
-.dial-who { font-size: 0.85rem; font-weight: 500; }
-.dial-rows .mini { display: block; text-align: right; }
+.saudi-note { margin-top: 0.4rem; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 0.5rem; padding: 0.3rem 0.55rem; background: var(--accent-bg); border-radius: 4px; color: var(--accent); }
+.saudi-tag { font-size: 0.75rem; font-weight: 700; grid-row: span 2; }
+.saudi-note .mini { font-size: 1.2rem; text-align: right; line-height: 1.5; }
+.saudi-note .translit { color: var(--accent); text-align: right; font-size: 0.8rem; }
 .note { margin: 0; max-width: 65ch; font-size: 0.9rem; color: var(--soft); }
 .lat { font-family: var(--latin); }
 .inline-ar { font-family: var(--arabic); font-size: 1.15em; }
@@ -196,7 +193,6 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
-.page[lang="ur"] .dial-note h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] #theme-group button { font-family: var(--urdu); line-height: 2; font-size: 0.85rem; padding-block: 0; }
 .page[lang="ur"] .callout h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
@@ -258,16 +254,6 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
     <div class="table-wide" id="table-wide"></div>
     <div class="table-narrow" id="table-narrow"></div>
     <p class="note" data-t="verbPrompt"></p>
-    <div class="dial-note">
-      <h3 data-t="dialNoteH"></h3>
-      <p data-t="dialNoteP"></p>
-      <ul class="dial-rows">
-        <li><span class="dial-who" data-t="dialI"></span><span class="mini" lang="ar">أَنَا كَتَبْتُ ← أَنَا كَتَبْتْ</span><span class="translit"><bdi class="lat" dir="ltr">katabtu → katabt</bdi></span></li>
-        <li><span class="dial-who" data-t="dialYouM"></span><span class="mini" lang="ar">أَنْتَ كَتَبْتَ ← إِنْتَ كَتَبْتْ</span><span class="translit"><bdi class="lat" dir="ltr">katabta → katabt</bdi></span></li>
-        <li><span class="dial-who" data-t="dialYouF"></span><span class="mini" lang="ar">أَنْتِ كَتَبْتِ ← إِنْتِي كَتَبْتِي</span><span class="translit"><bdi class="lat" dir="ltr">katabti → katabti</bdi></span></li>
-      </ul>
-      <p data-t="dialNoteEnd"></p>
-    </div>
 
     <div class="context-head">
       <h3 class="group-head" data-t="contextHead"></h3>
@@ -314,12 +300,7 @@ const T = {
     pickVerb: 'Choose a verb',
     contextHead: "Teacher's remarks",
     contextNote: '(all points made in class)',
-    dialNoteH: 'Saudi dialect note',
-    dialNoteP: 'In everyday Saudi Arabic, the last short vowel is dropped and the letter takes a sukoon.',
-    dialI: 'I wrote (male and female)',
-    dialYouM: 'You wrote (male)',
-    dialYouF: 'You wrote (female)',
-    dialNoteEnd: 'So "I wrote" and "you wrote (male)" sound the same. "You wrote (female)" keeps its i sound, written with ي.',
+    saudiLabel: 'Saudi',
     verbPrompt: 'Select the verbs and see how they sound and change in first, second, and third person reference.',
     contextSub: 'Pick a verb to update the examples below.',
     sukoonTitle: 'When a vowel becomes sukoon',
@@ -371,12 +352,7 @@ const T = {
     pickVerb: 'فعل چنیں',
     contextHead: 'استاد کے نکات',
     contextNote: '(کلاس میں بتائے گئے تمام نکات)',
-    dialNoteH: 'سعودی لہجے کا نوٹ',
-    dialNoteP: 'روزمرہ سعودی عربی میں آخری چھوٹی حرکت نہیں بولی جاتی اور آخری حرف پر سکون آ جاتا ہے۔',
-    dialI: 'میں نے لکھا (مذکر اور مؤنث)',
-    dialYouM: 'تم نے لکھا (مذکر)',
-    dialYouF: 'تم نے لکھا (مؤنث)',
-    dialNoteEnd: '«میں نے لکھا» اور «تم نے لکھا» (مذکر) ایک جیسے سنائی دیتے ہیں۔ «تم نے لکھا» (مؤنث) میں i کی آواز رہتی ہے اور اسے ي سے لکھا جاتا ہے۔',
+    saudiLabel: 'سعودی',
     verbPrompt: 'فعل چنیں اور دیکھیں کہ وہ پہلے، دوسرے اور تیسرے شخص میں کیسے سنائی دیتے اور بدلتے ہیں۔',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
     sukoonTitle: 'جب حرکت سکون میں بدل جائے',
@@ -558,6 +534,21 @@ function rowLabel(x) {
   return x.row === 'group' ? t().group : t().rows[x.row];
 }
 
+const SAUDI = {
+  i_m: ['أَنَا', 'ْتْ', 't', true], i_f: ['أَنَا', 'ْتْ', 't', true],
+  you_m: ['إِنْتَ', 'ْتْ', 't', true], you_f: ['إِنْتِي', 'ْتِي', 'ti', true], he: ['هُوَ', 'ْ', '', false]
+};
+const SAUDI_STEM = {
+  dhahab: { ar: 'رَاح', t: 'raah', short: { ar: 'رُح', t: 'ruh' } },
+  naam: { ar: 'نَام', t: 'naam', short: { ar: 'نِم', t: 'nim' } }
+};
+function saudiNote(v, x) {
+  const d = SAUDI[x.k];
+  if (!d) return '';
+  const base = SAUDI_STEM[v.t] || { ar: v.ar, t: v.t };
+  const st = d[3] && base.short ? base.short : base;
+  return `<div class="saudi-note"><span class="saudi-tag">${t().saudiLabel}</span><span class="mini" lang="ar">${d[0]} ${st.ar}<span class="end">${d[1]}</span></span><span class="translit">${lat(st.t + d[2])}</span></div>`;
+}
 function cellHtml(x, v, c, withLabel) {
   const st = stem(v, x);
   const chip = /^[َُ]/.test(x.e) ? 'ـ' + x.e : x.e;
@@ -565,6 +556,7 @@ function cellHtml(x, v, c, withLabel) {
     ${withLabel ? `<span class="cell-label">${rowLabel(x)}</span>` : ''}
     <div class="arabic" lang="ar">${x.p} ${st.ar}${x.s}<span class="end">${x.e}</span></div>
     <div class="meaning"><span>${lat(`<b>${st.t}${x.te}</b>`)} · ${meaning(v, x)}</span><span class="chip" lang="ar">+ ${chip}</span></div>
+    ${saudiNote(v, x)}
   </div>`;
 }
 
