@@ -53,6 +53,7 @@ body {
 }
 .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem 1rem; }
 h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap: balance; }
+.top-actions { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
 .lang { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
 .lang button { font: inherit; font-size: 0.9rem; color: var(--ink); background: none; border: 0; padding: 0.3rem 0.8rem; cursor: pointer; }
 .lang button[lang="ur"] { font-family: var(--urdu); line-height: 2; font-size: 0.85rem; padding-block: 0; }
@@ -188,6 +189,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
+.page[lang="ur"] #theme-group button { font-family: var(--urdu); line-height: 2; font-size: 0.85rem; padding-block: 0; }
 .page[lang="ur"] .callout h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
 .page[lang="ur"] .source { font-size: 0.75rem; }
@@ -223,10 +225,14 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 <main class="page" id="page" lang="en" dir="ltr">
   <div class="top">
     <h1 data-t="siteTitle">Arabic Learning Path</h1>
+    <div class="top-actions"><div class="lang" role="group" id="theme-group" aria-label="Theme">
+      <button type="button" id="theme-light" aria-pressed="false"></button>
+      <button type="button" id="theme-dark" aria-pressed="false"></button>
+    </div>
     <div class="lang" role="group" aria-label="Language">
       <button type="button" id="lang-en" lang="en" dir="ltr" aria-pressed="true">English</button>
       <button type="button" id="lang-ur" lang="ur" dir="rtl" aria-pressed="false">اردو</button>
-    </div>
+    </div></div>
   </div>
   <nav data-aria="topicsLabel"><ol class="timeline" id="timeline"></ol></nav>
 
@@ -289,6 +295,9 @@ const ar = text => `<bdi class="inline-ar" lang="ar" dir="rtl">${text}</bdi>`;
 const T = {
   en: {
     siteTitle: 'Arabic Learning Path',
+    light: 'Light',
+    dark: 'Dark',
+    themeLabel: 'Theme',
     topicsLabel: 'Topics',
     comingSoon: 'Coming soon',
     ready: 'Ready',
@@ -337,6 +346,9 @@ const T = {
   },
   ur: {
     siteTitle: 'عربی سیکھنے کا راستہ',
+    light: 'روشن',
+    dark: 'تاریک',
+    themeLabel: 'رنگ',
     topicsLabel: 'موضوعات',
     comingSoon: 'جلد آ رہا ہے',
     ready: 'تیار',
@@ -748,6 +760,7 @@ function applyLanguage() {
   page.lang = lang;
   page.dir = lang === 'ur' ? 'rtl' : 'ltr';
   renderLessons();
+  paintTheme();
   renderQuestions();
   document.querySelectorAll('[data-t]').forEach(el => { el.innerHTML = L[el.dataset.t]; });
   document.querySelectorAll('[data-aria]').forEach(el => el.setAttribute('aria-label', L[el.dataset.aria]));
@@ -762,6 +775,34 @@ function applyLanguage() {
   draw();
   showTopic(topicId);
 }
+
+const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+let theme = null;
+try { const saved = localStorage.getItem('arabic-timeline-theme'); if (saved === 'light' || saved === 'dark') theme = saved; } catch (e) {}
+function currentTheme() {
+  const attr = document.documentElement.getAttribute('data-theme');
+  if (attr === 'light' || attr === 'dark') return attr;
+  return darkQuery && darkQuery.matches ? 'dark' : 'light';
+}
+function paintTheme() {
+  const L = t();
+  const now = currentTheme();
+  $('theme-light').textContent = L.light;
+  $('theme-dark').textContent = L.dark;
+  $('theme-group').setAttribute('aria-label', L.themeLabel);
+  $('theme-light').setAttribute('aria-pressed', now === 'light' ? 'true' : 'false');
+  $('theme-dark').setAttribute('aria-pressed', now === 'dark' ? 'true' : 'false');
+}
+function setTheme(next) {
+  theme = next;
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('arabic-timeline-theme', next); } catch (e) {}
+  paintTheme();
+}
+if (theme) document.documentElement.setAttribute('data-theme', theme);
+$('theme-light').addEventListener('click', () => setTheme('light'));
+$('theme-dark').addEventListener('click', () => setTheme('dark'));
+if (darkQuery && darkQuery.addEventListener) darkQuery.addEventListener('change', paintTheme);
 
 function setLanguage(next) {
   lang = next;
