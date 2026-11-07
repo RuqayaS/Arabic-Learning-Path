@@ -139,6 +139,7 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .saudi-tag { font-size: 0.75rem; font-weight: 700; grid-row: span 2; }
 .saudi-note .mini { font-size: 1.2rem; text-align: right; line-height: 1.5; }
 .saudi-note .translit { color: var(--accent); text-align: right; font-size: 0.8rem; }
+.saudi-why { grid-column: 1 / -1; margin-top: 0.2rem; font-size: 0.8rem; color: var(--ink); }
 .note { margin: 0; max-width: 65ch; font-size: 0.9rem; color: var(--soft); }
 .lat { font-family: var(--latin); }
 .inline-ar { font-family: var(--arabic); font-size: 1.15em; }
@@ -300,7 +301,9 @@ const T = {
     pickVerb: 'Choose a verb',
     contextHead: "Teacher's remarks",
     contextNote: '(all points made in class)',
-    saudiLabel: 'Saudi',
+    saudiLabel: 'Saudi dialect',
+    saudiDrop: 'The last vowel gets dropped in Saudi dialect.',
+    saudiKeep: 'In Saudi dialect, the last vowel stays and becomes long (ي).',
     verbPrompt: 'Select the verbs and see how they sound and change in first, second, and third person reference.',
     contextSub: 'Pick a verb to update the examples below.',
     sukoonTitle: 'When a vowel becomes sukoon',
@@ -352,7 +355,9 @@ const T = {
     pickVerb: 'فعل چنیں',
     contextHead: 'استاد کے نکات',
     contextNote: '(کلاس میں بتائے گئے تمام نکات)',
-    saudiLabel: 'سعودی',
+    saudiLabel: 'سعودی لہجہ',
+    saudiDrop: 'سعودی لہجے میں آخری حرکت ہٹ جاتی ہے۔',
+    saudiKeep: 'سعودی لہجے میں آخری حرکت رہتی ہے اور لمبی ہو جاتی ہے (ي)۔',
     verbPrompt: 'فعل چنیں اور دیکھیں کہ وہ پہلے، دوسرے اور تیسرے شخص میں کیسے سنائی دیتے اور بدلتے ہیں۔',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
     sukoonTitle: 'جب حرکت سکون میں بدل جائے',
@@ -547,7 +552,7 @@ function saudiNote(v, x) {
   if (!d) return '';
   const base = SAUDI_STEM[v.t] || { ar: v.ar, t: v.t };
   const st = d[3] && base.short ? base.short : base;
-  return `<div class="saudi-note"><span class="saudi-tag">${t().saudiLabel}</span><span class="mini" lang="ar">${d[0]} ${st.ar}<span class="end">${d[1]}</span></span><span class="translit">${lat(st.t + d[2])}</span></div>`;
+  return `<div class="saudi-note"><span class="saudi-tag">${t().saudiLabel}</span><span class="mini" lang="ar">${d[0]} ${st.ar}<span class="end">${d[1]}</span></span><span class="translit">${lat(st.t + d[2])}</span><span class="saudi-why">${x.k === 'you_f' ? t().saudiKeep : t().saudiDrop}</span></div>`;
 }
 function cellHtml(x, v, c, withLabel) {
   const st = stem(v, x);
