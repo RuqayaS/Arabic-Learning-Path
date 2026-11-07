@@ -135,11 +135,13 @@ h1 { margin: 0; font-size: 1.5rem; line-height: 1.2; font-weight: 700; text-wrap
 .meaning { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.25rem 0.6rem; font-size: 0.9rem; color: var(--soft); }
 .meaning b { color: var(--ink); font-weight: 500; }
 .chip { font-family: var(--arabic); font-size: 1.05rem; line-height: 1.5; direction: rtl; color: var(--accent); background: var(--accent-bg); border-radius: 4px; padding: 0 0.45rem; white-space: nowrap; }
-.form { display: grid; gap: 0; min-width: 0; }
-.form.dial { margin-top: 0.35rem; padding-top: 0.35rem; border-top: 1px dashed var(--line); }
-.tag { font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--soft); font-weight: 700; }
-.form.dial .arabic { font-size: 1.4rem; }
-.gloss { margin-top: 0.3rem; font-size: 0.85rem; color: var(--soft); }
+.dial-note { display: grid; gap: 0.5rem; padding: 0.85rem; background: var(--accent-bg); border: 1px solid var(--accent); border-radius: 6px; min-width: 0; }
+.dial-note h3 { margin: 0; font-size: 1.05rem; font-weight: 700; color: var(--accent); }
+.dial-note p { margin: 0; max-width: 65ch; }
+.dial-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.dial-rows li { display: grid; gap: 0.1rem; padding: 0.45rem 0.7rem; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
+.dial-who { font-size: 0.85rem; font-weight: 500; }
+.dial-rows .mini { display: block; text-align: right; }
 .note { margin: 0; max-width: 65ch; font-size: 0.9rem; color: var(--soft); }
 .lat { font-family: var(--latin); }
 .inline-ar { font-family: var(--arabic); font-size: 1.15em; }
@@ -194,8 +196,7 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
 .page[lang="ur"] h1 { font-size: 1.3rem; }
 .page[lang="ur"] .panel h2 { font-size: 1.1rem; }
 .page[lang="ur"] .person { font-size: 0.95rem; }
-.page[lang="ur"] .tag { font-size: 0.75rem; letter-spacing: 0; line-height: 2; }
-.page[lang="ur"] .gloss { font-size: 0.85rem; line-height: 2.2; }
+.page[lang="ur"] .dial-note h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] #theme-group button { font-family: var(--urdu); line-height: 2; font-size: 0.85rem; padding-block: 0; }
 .page[lang="ur"] .callout h3 { font-size: 1rem; line-height: 2.2; }
 .page[lang="ur"] .sec-head { font-size: 1.05rem; line-height: 2.2; }
@@ -257,6 +258,16 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
     <div class="table-wide" id="table-wide"></div>
     <div class="table-narrow" id="table-narrow"></div>
     <p class="note" data-t="verbPrompt"></p>
+    <div class="dial-note">
+      <h3 data-t="dialNoteH"></h3>
+      <p data-t="dialNoteP"></p>
+      <ul class="dial-rows">
+        <li><span class="dial-who" data-t="dialI"></span><span class="mini" lang="ar">أَنَا كَتَبْتُ ← أَنَا كَتَبْتْ</span><span class="translit"><bdi class="lat" dir="ltr">katabtu → katabt</bdi></span></li>
+        <li><span class="dial-who" data-t="dialYouM"></span><span class="mini" lang="ar">أَنْتَ كَتَبْتَ ← إِنْتَ كَتَبْتْ</span><span class="translit"><bdi class="lat" dir="ltr">katabta → katabt</bdi></span></li>
+        <li><span class="dial-who" data-t="dialYouF"></span><span class="mini" lang="ar">أَنْتِ كَتَبْتِ ← إِنْتِي كَتَبْتِي</span><span class="translit"><bdi class="lat" dir="ltr">katabti → katabti</bdi></span></li>
+      </ul>
+      <p data-t="dialNoteEnd"></p>
+    </div>
 
     <div class="context-head">
       <h3 class="group-head" data-t="contextHead"></h3>
@@ -265,13 +276,6 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; 
     </div>
     <div class="picker picker-center" id="picker-context" role="group"></div>
 
-    <details id="fold-sukoon">
-      <summary><span class="sum-title" data-t="dialTitle"></span><span class="sum-sub" data-t="dialSub"></span></summary>
-      <div class="fold">
-        <ul class="gen-list" id="dial-points"></ul>
-        <div class="stop-wrap"><table class="stop-table"><thead><tr><th scope="col" data-t="colMeaning"></th><th scope="col" data-t="msa"></th><th scope="col" data-t="saudi"></th></tr></thead><tbody id="stop-body"></tbody></table></div>
-      </div>
-    </details>
 
     <details id="fold-dropped">
       <summary><span class="sum-title" data-t="droppedTitle"></span><span class="sum-sub" data-t="droppedSub"></span></summary>
@@ -310,20 +314,37 @@ const T = {
     pickVerb: 'Choose a verb',
     contextHead: "Teacher's remarks",
     contextNote: '(all points made in class)',
+    dialNoteH: 'Saudi dialect note',
+    dialNoteP: 'In everyday Saudi Arabic, the last short vowel is dropped and the letter takes a sukoon.',
+    dialI: 'I wrote (male and female)',
+    dialYouM: 'You wrote (male)',
+    dialYouF: 'You wrote (female)',
+    dialNoteEnd: 'So "I wrote" and "you wrote (male)" sound the same. "You wrote (female)" keeps its i sound, written with ي.',
     verbPrompt: 'Select the verbs and see how they sound and change in first, second, and third person reference.',
     contextSub: 'Pick a verb to update the examples below.',
+    sukoonTitle: 'When a vowel becomes sukoon',
+    sukoonSub: 'How endings sound when you stop after a word',
+    allEndings: 'All the endings at a stop',
+    stopRule: 'When you stop after a word, you usually drop its short last vowel. In the middle of a sentence, the vowel stays.',
     colMeaning: 'Meaning',
-    msa: 'Standard',
-    saudi: 'Saudi',
-    dialTitle: 'Standard Arabic and Saudi dialect',
-    dialSub: 'How the same verb sounds in everyday speech',
-    dialPoints: ['Saudi Arabic drops the short vowel at the end, so I and you (male) sound the same, as in katabt.', 'You (female) keeps an i sound at the end, as in katabti.', 'You all ends in -tu, and they ends in -u.', `Some pronouns change: ${ar('نَحْنُ')} becomes ${ar('حنا')}, and ${ar('أَنْتُمْ')} becomes ${ar('إنتو')}.`, `Some verbs change too. "Went" is usually ${ar('راح')} in Saudi Arabic instead of ${ar('ذَهَب')}.`, 'Dialect has no fixed spelling, so you may see these forms written in different ways.'],
+    colFull: 'Full form',
+    colStop: 'At a stop',
+    noChange: `These stay the same because they already end in sukoon or a long vowel: ${lat('-tum, -at, -naa, -uu')}.`,
     droppedTitle: 'The pronoun is inside the verb',
     droppedSub: 'The ending already says I, you, he, or she',
     dPronounP: `The ending already shows who did the action, so ${ar('أَنَا')} and ${ar('هُوَ')} are usually left out. Keep them for emphasis.`,
     alifVerbsTitle: 'Verbs with alif',
     alifVerbsSub: 'When the alif drops and when it comes back',
     alifVerbsNote: `Slept and came lose the middle alif in first and second person, then get it back in third person. It also drops for they (female): ${ar('نِمْنَ')}, ${ar('جِئْنَ')}. Ate keeps its alif because it is the first letter, not a middle alif.`,
+    whyH: 'Why I and you (male) can sound the same',
+    whyP: 'When you stop on a word in Arabic, you usually don\'t say its short last vowel. The damma in the I form and the fatha in the you form both drop, so ت gets a sukoon in both. The you (female) form usually does the same.',
+    whyNote: 'The sentence usually shows who is meant. If it doesn\'t, speakers often keep the vowel.',
+    alifH: 'The alif in first person',
+    alifP: `The alif in ${ar('أَنَا')} is always written. In formal Arabic, it usually sounds short in the middle of a sentence and long when you stop on the word. The alif in ${ar('نَا')} stays long in formal Arabic, even at a stop, but many dialects shorten it.`,
+    anaLabel: `${ar('أَنَا')}, in the middle of a sentence`,
+    naLabel: `${ar('نَا')}, formal and dialect`,
+    becomes: (a, b) => `${lat(a)} becomes ${lat(b)}`,
+    naText: (a, b) => `${lat(a)}, often ${lat(b)} in dialect`,
     rows: ['Male', 'Female', 'Group: male or mixed', 'Group: female'],
     group: 'Group',
     persons: [['First person', 'I, we'], ['Second person', 'you'], ['Third person', 'he, she, they']],
@@ -350,20 +371,37 @@ const T = {
     pickVerb: 'فعل چنیں',
     contextHead: 'استاد کے نکات',
     contextNote: '(کلاس میں بتائے گئے تمام نکات)',
+    dialNoteH: 'سعودی لہجے کا نوٹ',
+    dialNoteP: 'روزمرہ سعودی عربی میں آخری چھوٹی حرکت نہیں بولی جاتی اور آخری حرف پر سکون آ جاتا ہے۔',
+    dialI: 'میں نے لکھا (مذکر اور مؤنث)',
+    dialYouM: 'تم نے لکھا (مذکر)',
+    dialYouF: 'تم نے لکھا (مؤنث)',
+    dialNoteEnd: '«میں نے لکھا» اور «تم نے لکھا» (مذکر) ایک جیسے سنائی دیتے ہیں۔ «تم نے لکھا» (مؤنث) میں i کی آواز رہتی ہے اور اسے ي سے لکھا جاتا ہے۔',
     verbPrompt: 'فعل چنیں اور دیکھیں کہ وہ پہلے، دوسرے اور تیسرے شخص میں کیسے سنائی دیتے اور بدلتے ہیں۔',
     contextSub: 'نیچے کی مثالیں بدلنے کے لیے فعل چنیں۔',
+    sukoonTitle: 'جب حرکت سکون میں بدل جائے',
+    sukoonSub: 'لفظ پر رکنے سے آخری آواز کیسے بدلتی ہے',
+    allEndings: 'رکنے پر تمام آخری حصے',
+    stopRule: 'لفظ پر رکتے وقت اس کی چھوٹی آخری حرکت عام طور پر نہیں بولی جاتی۔ جملے کے بیچ میں حرکت باقی رہتی ہے۔',
     colMeaning: 'مطلب',
-    msa: 'فصیح',
-    saudi: 'سعودی',
-    dialTitle: 'فصیح عربی اور سعودی لہجہ',
-    dialSub: 'روزمرہ بول چال میں وہی فعل کیسے سنائی دیتا ہے',
-    dialPoints: [`سعودی عربی میں آخری چھوٹی حرکت نہیں بولی جاتی، اس لیے «میں» اور «تم» (مذکر) ایک جیسے سنائی دیتے ہیں، جیسے ${lat('katabt')}۔`, `«تم» (مؤنث) کے آخر میں ${lat('i')} کی آواز رہتی ہے، جیسے ${lat('katabti')}۔`, `«تم سب» کے آخر میں ${lat('-tu')} اور «وہ» (جمع) کے آخر میں ${lat('-u')} آتا ہے۔`, `کچھ ضمیریں بدلتی ہیں: ${ar('نَحْنُ')} سے ${ar('حنا')} اور ${ar('أَنْتُمْ')} سے ${ar('إنتو')} بنتا ہے۔`, `کچھ فعل بھی بدلتے ہیں۔ «گیا» کے لیے سعودی عربی میں عام طور پر ${ar('ذَهَب')} کی جگہ ${ar('راح')} آتا ہے۔`, 'لہجے کی کوئی طے شدہ املا نہیں، اس لیے یہ شکلیں مختلف طریقوں سے لکھی مل سکتی ہیں۔'],
+    colFull: 'پوری شکل',
+    colStop: 'رکنے پر',
+    noChange: `یہ نہیں بدلتے، کیونکہ ان کے آخر میں پہلے سے سکون یا لمبی آواز ہے: <span class="nb">${lat('-tum, -at, -naa, -uu')}</span>۔`,
     droppedTitle: 'ضمیر فعل کے اندر ہوتا ہے',
     droppedSub: 'آخری حصہ ہی بتا دیتا ہے: میں، تم، وہ',
     dPronounP: `آخری حصے سے پتا چل جاتا ہے کہ کام کس نے کیا، اس لیے ${ar('أَنَا')} اور ${ar('هُوَ')} عام طور پر چھوڑ دیے جاتے ہیں۔ زور دینے کے لیے انہیں رکھا جاتا ہے۔`,
     alifVerbsTitle: 'الف والے فعل',
     alifVerbsSub: 'الف کب ہٹتا ہے اور کب واپس آتا ہے',
     alifVerbsNote: `سویا اور آیا میں بیچ کا الف پہلے اور دوسرے شخص میں ہٹ جاتا ہے، پھر تیسرے شخص میں واپس آتا ہے۔ «وہ» (جمع مؤنث) میں بھی یہ ہٹ جاتا ہے: ${ar('نِمْنَ')}، ${ar('جِئْنَ')}۔ کھایا میں الف رہتا ہے، کیونکہ وہ پہلا حرف ہے، بیچ کا الف نہیں۔`,
+    whyH: 'میں اور تم (مذکر) ایک جیسے کیوں سنائی دے سکتے ہیں',
+    whyP: 'عربی میں لفظ پر رکتے وقت چھوٹی آخری حرکت عام طور پر نہیں بولی جاتی۔ «میں» والی شکل کا پیش اور «تم» والی شکل کا زبر دونوں ہٹ جاتے ہیں، اس لیے دونوں میں ت پر سکون آ جاتا ہے۔ «تم» (مؤنث) میں بھی عام طور پر یہی ہوتا ہے۔',
+    whyNote: 'جملے سے عام طور پر پتا چل جاتا ہے کہ بات کس کی ہو رہی ہے۔ اگر نہ چلے تو بولنے والے اکثر حرکت باقی رکھتے ہیں۔',
+    alifH: 'پہلے شخص میں الف',
+    alifP: `${ar('أَنَا')} کا الف ہمیشہ لکھا جاتا ہے۔ فصیح عربی میں یہ جملے کے بیچ عام طور پر چھوٹا اور لفظ پر رکنے پر لمبا سنائی دیتا ہے۔ ${ar('نَا')} کا الف فصیح عربی میں رکنے پر بھی لمبا رہتا ہے، لیکن کئی لہجوں میں چھوٹا ہو جاتا ہے۔`,
+    anaLabel: `${ar('أَنَا')}، جملے کے بیچ میں`,
+    naLabel: `${ar('نَا')}، فصیح اور لہجہ`,
+    becomes: (a, b) => `${lat(a)} سے ${lat(b)} بن جاتا ہے`,
+    naText: (a, b) => `${lat(a)}، لہجے میں اکثر ${lat(b)}`,
     rows: ['مذکر', 'مؤنث', 'جمع: مذکر یا ملا جلا', 'جمع: مؤنث'],
     group: 'جمع',
     persons: [['پہلا شخص', 'میں، ہم'], ['دوسرا شخص', 'تم'], ['تیسرا شخص', 'وہ']],
@@ -454,12 +492,19 @@ const persons = [
     { r: 5, row: 3, k: 'they_f', p: 'هُنَّ', s: 'ْ', e: 'نَ', te: 'na', who: 'they' }
   ]}
 ];
+const stops = [
+  { who: 'I', k: 'i_m', s: 'ْ', e: 'تُ', te: 'tu', x: 'تْ', tx: 't' },
+  { who: 'You', k: 'you_m', g: 'gMale', s: 'ْ', e: 'تَ', te: 'ta', x: 'تْ', tx: 't' },
+  { who: 'You', k: 'you_f', g: 'gFemale', s: 'ْ', e: 'تِ', te: 'ti', x: 'تْ', tx: 't' },
+  { who: 'He', k: 'he', s: '', e: 'َ', te: 'a', x: '', tx: '' },
+  { who: 'They', k: 'they_f', g: 'gFemale', s: 'ْ', e: 'نَ', te: 'na', x: 'نْ', tx: 'n' },
+  { who: 'You all', k: 'youp_f', g: 'gFemale', s: 'ْ', e: 'تُنَّ', te: 'tunna', x: 'تُنّْ', tx: 'tunn' }
+];
 
 const $ = id => document.getElementById(id);
 const pickers = [[$('picker'), 'verb-'], [$('picker-context'), 'context-verb-']];
 const wide = $('table-wide');
 const narrow = $('table-narrow');
-const stopBody = $('stop-body');
 
 let lang = 'en';
 let verbIndex = 0;
@@ -513,37 +558,13 @@ function rowLabel(x) {
   return x.row === 'group' ? t().group : t().rows[x.row];
 }
 
-const DIAL = {
-  i_m: ['أنا', 'ت', 't'], i_f: ['أنا', 'ت', 't'], we: ['حنا', 'نا', 'na'],
-  you_m: ['إنت', 'ت', 't'], you_f: ['إنتي', 'تي', 'ti'], youp_m: ['إنتو', 'توا', 'tu'], youp_f: ['إنتن', 'تن', 'tin'],
-  he: ['هو', '', ''], she: ['هي', 'ت', 'at'], they_m: ['هم', 'وا', 'u'], they_f: ['هن', 'ن', 'in']
-};
-const DIAL_STEM = {
-  dhahab: { ar: 'راح', t: 'raah', short: { ar: 'رح', t: 'ruh' } },
-  naam: { ar: 'نام', t: 'naam', short: { ar: 'نم', t: 'nim' } }
-};
-const bareAr = text => text.replace(/[\u064B-\u0652]/g, '');
-function dialForm(v, x) {
-  const d = DIAL_STEM[v.t] || { ar: bareAr(v.ar), t: v.t };
-  const st = x.s && d.short ? d.short : d;
-  const e = DIAL[x.k];
-  return { ar: `${st.ar}<span class="end">${e[1]}</span>`, t: st.t + e[2], chip: e[1] ? 'ـ' + e[1] : '', pron: e[0] };
-}
-function msaForm(v, x) {
-  const st = stem(v, x);
-  return { ar: `${st.ar}${x.s}<span class="end">${x.e}</span>`, t: st.t + x.te, chip: /^[َُ]/.test(x.e) ? 'ـ' + x.e : x.e };
-}
 function cellHtml(x, v, c, withLabel) {
-  const L = t();
-  const m = msaForm(v, x);
-  const d = dialForm(v, x);
+  const st = stem(v, x);
+  const chip = /^[َُ]/.test(x.e) ? 'ـ' + x.e : x.e;
   return `<div class="cell" style="--c:${c};--r:${x.r};--s:${x.span || 1}">
     ${withLabel ? `<span class="cell-label">${rowLabel(x)}</span>` : ''}
-    <div class="form"><span class="tag">${L.msa}</span><div class="arabic" lang="ar">${x.p} ${m.ar}</div>
-    <div class="meaning"><span>${lat(`<b>${m.t}</b>`)}</span><span class="chip" lang="ar">+ ${m.chip}</span></div></div>
-    <div class="form dial"><span class="tag">${L.saudi}</span><div class="arabic" lang="ar">${d.pron} ${d.ar}</div>
-    <div class="meaning"><span>${lat(`<b>${d.t}</b>`)}</span>${d.chip ? `<span class="chip" lang="ar">+ ${d.chip}</span>` : ''}</div></div>
-    <div class="gloss">${meaning(v, x)}</div>
+    <div class="arabic" lang="ar">${x.p} ${st.ar}${x.s}<span class="end">${x.e}</span></div>
+    <div class="meaning"><span>${lat(`<b>${st.t}${x.te}</b>`)} · ${meaning(v, x)}</span><span class="chip" lang="ar">+ ${chip}</span></div>
   </div>`;
 }
 
@@ -563,13 +584,6 @@ function draw() {
     $('person-body-' + n).innerHTML = p.cells.map(x => cellHtml(x, v, p.c, true)).join('');
   });
 
-  const gTag = { you_m: L.gMale, you_f: L.gFemale, youp_m: L.gMale, youp_f: L.gFemale, they_m: L.gMale, they_f: L.gFemale };
-  stopBody.innerHTML = persons.flatMap(p => p.cells).filter(x => x.k !== 'i_f').map(x => {
-    const m = msaForm(v, x);
-    const d = dialForm(v, x);
-    return `<tr><td>${meaning(v, x)}${gTag[x.k] || ''}</td><td><span class="mini" lang="ar">${m.ar}</span><span class="translit">${lat(m.t)}</span></td><td><span class="mini" lang="ar">${d.ar}</span><span class="translit">${lat(d.t)}</span></td></tr>`;
-  }).join('');
-  $('dial-points').innerHTML = L.dialPoints.map(x => `<li>${x}</li>`).join('');
 
   const more = pronounExamples[v.t];
   $('ex-pronoun').innerHTML = [[v.i, v.it, v.ie, v.iu], more.she, more.we].map(x => `<div>${exHtml(x[0], x[1], lang === 'ur' ? x[3] : x[2])}</div>`).join('');
